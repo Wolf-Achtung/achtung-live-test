@@ -52,22 +52,23 @@ Hier ist der zu prüfende Text:
 \"\"\"{user_input}\"\"\"
     '''
 
-    try:
-        response = openai.Completion.create(
-            model="gpt-4",
-            prompt=prompt,
-            temperature=0.7,
-            max_tokens=800,
-            top_p=1,
-            frequency_penalty=0.3,
-            presence_penalty=0.1,
-        )
-        gpt_output = response.choices[0].text.strip()
-        suggestions = gpt_output.split("\n\n")
-        return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
-   except Exception as e:
+   try:
+    response = openai.Completion.create(
+        model="gpt-4",
+        prompt=prompt,
+        temperature=0.7,
+        max_tokens=800,
+        top_p=1,
+        frequency_penalty=0.3,
+        presence_penalty=0.1,
+    )
+    gpt_output = response.choices[0].text.strip()
+    suggestions = gpt_output.split("\n\n")
+    return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
+except Exception as e:
     print("❌ GPT-Fehler:", str(e))
     return jsonify({ "error": str(e) }), 500
+
 
 @app.route("/", methods=["GET"])
 def home():
