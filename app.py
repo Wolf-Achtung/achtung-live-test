@@ -62,8 +62,10 @@ Hier ist der zu prüfende Text:
         gpt_output = response.choices[0].text.strip()
         suggestions = gpt_output.split("\n\n")
         return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
-    except Exception as e:
-        return jsonify({ "error": str(e) }), 500
+   except Exception as e:
+    print("❌ GPT-Fehler:", str(e))
+    return jsonify({ "error": str(e) }), 500
+
 @app.route("/", methods=["GET"])
 def home():
     return "🚀 Achtung.live API läuft!"
