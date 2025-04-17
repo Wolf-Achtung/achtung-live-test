@@ -16,7 +16,7 @@ async function analyzeText() {
         <div><strong>Vorschlag ${i + 1}:</strong><br>${s}</div><br>
       `).join("");
     } else {
-      output.innerHTML = "⚠️ Keine Vorschläge gefunden.";
+     output.innerHTML = "⚠️ Keine Vorschläge gefunden.<br><pre>" + data.gpt_raw + "</pre>";
     }
   } catch (err) {
     output.innerHTML = "❌ Fehler: " + err.message;
