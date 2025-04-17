@@ -19,7 +19,7 @@ def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
 
-    prompt = f'''
+    system_prompt = """
 Du bist ein empathischer Datenschutz-Coach mit medizinischem Feingefühl. Deine Aufgabe ist es, den folgenden Text auf sensible Inhalte zu prüfen und – falls nötig – sichere, bedeutungserhaltende Alternativen vorzuschlagen.
 
 Achte besonders auf:
@@ -49,25 +49,26 @@ Eine sachliche, fachlich fundierte Version – für professionelle Kontexte.
 
 ✨ Bonus (optional):  
 Erkläre in 1–2 Sätzen, warum der Originaltext datenschutzrechtlich problematisch war – und wie deine Rewrites helfen, das Risiko zu reduzieren.
-
----
-Hier ist der zu prüfende Text:  
-\"\"\"{user_input}\"\"\"
-    '''
+"""
 
     try:
-        response = openai.Completion.create(
-            model="gpt-4",
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Alternativ: "gpt-4o"
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Bitte prüfe folgenden Text:\n\n{user_input}"}
+            ],
             temperature=0.7,
             max_tokens=800,
             top_p=1,
             frequency_penalty=0.3,
-            presence_penalty=0.1,
+            presence_penalty=0.1
         )
-        gpt_output = response.choices[0].text.strip()
+
+        gpt_output = response.choices[0].message.content.strip()
         suggestions = gpt_output.split("\n\n")
         return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
+
     except Exception as e:
         print("❌ GPT-Fehler:", str(e))
         return jsonify({ "error": str(e) }), 500
