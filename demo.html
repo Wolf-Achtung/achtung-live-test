@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo Rewrite</title>
+</head>
+<body>
+  <h1>Demo: Rewrite-Vorschläge via GPT</h1>
+  <textarea id="textInput" rows="8" cols="80">Gib hier deinen sensiblen Text ein ...</textarea><br>
+  <button onclick="sendToGPT()">Analyse starten</button>
+  <div id="results"></div>
+
+  <script>
+    async function sendToGPT() {
+      const input = document.getElementById('textInput').value;
+      const res = await fetch("https://achtung-rewrite-test.up.railway.app/debug-gpt", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ text: input })
+      });
+      const data = await res.json();
+      document.getElementById('results').innerHTML = data.suggestions.map(
+        (s, i) => `<h3>Vorschlag ${i+1}</h3><p>${s}</p>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>

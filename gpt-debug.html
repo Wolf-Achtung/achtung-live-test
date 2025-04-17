@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>GPT Debug</title>
+</head>
+<body>
+  <h2>GPT Debug View</h2>
+  <textarea id="debugInput" rows="10" cols="80">Testtext für Analyse...</textarea><br>
+  <button onclick="debugRequest()">Senden</button>
+  <pre id="debugOutput"></pre>
+
+  <script>
+    async function debugRequest() {
+      const input = document.getElementById("debugInput").value;
+      const res = await fetch("/debug-gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: input })
+      });
+      const data = await res.json();
+      document.getElementById("debugOutput").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
