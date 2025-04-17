@@ -3,13 +3,16 @@ from flask_cors import CORS
 import os
 import openai
 
-from flask_cors import CORS
-
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    raise ValueError("❌ OPENAI_API_KEY fehlt – bitte in Railway setzen!")
+
+@app.route("/", methods=["GET"])
+def home():
+    return "🚀 Achtung.live API läuft!"
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
@@ -52,28 +55,22 @@ Hier ist der zu prüfende Text:
 \"\"\"{user_input}\"\"\"
     '''
 
-   try:
-    response = openai.Completion.create(
-        model="gpt-4",
-        prompt=prompt,
-        temperature=0.7,
-        max_tokens=800,
-        top_p=1,
-        frequency_penalty=0.3,
-        presence_penalty=0.1,
-    )
-    gpt_output = response.choices[0].text.strip()
-    suggestions = gpt_output.split("\n\n")
-    return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
-except Exception as e:
-    print("❌ GPT-Fehler:", str(e))
-    return jsonify({ "error": str(e) }), 500
-
-
-@app.route("/", methods=["GET"])
-def home():
-    return "🚀 Achtung.live API läuft!"
+    try:
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo-instruct",
+            prompt=prompt,
+            temperature=0.7,
+            max_tokens=800,
+            top_p=1,
+            frequency_penalty=0.3,
+            presence_penalty=0.1,
+        )
+        gpt_output = response.choices[0].text.strip()
+        suggestions = gpt_output.split("\n\n")
+        return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
+    except Exception as e:
+        print("❌ GPT-Fehler:", str(e))
+        return jsonify({ "error": str(e) }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
-
