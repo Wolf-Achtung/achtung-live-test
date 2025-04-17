@@ -57,7 +57,7 @@ Hier ist der zu prüfende Text:
 
     try:
         response = openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",
+            model="gpt-4",
             prompt=prompt,
             temperature=0.7,
             max_tokens=800,
