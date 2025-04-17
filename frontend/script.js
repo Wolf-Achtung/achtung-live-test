@@ -16,13 +16,10 @@ async function analyzeText() {
         <div><strong>Vorschlag ${i + 1}:</strong><br>${s}</div><br>
       `).join("");
     } else {
-      output.innerHTML = `
-        ⚠️ Keine Vorschläge gefunden.<br><br>
-        <strong>GPT-Rohantwort:</strong><br>
-        <pre>${data.gpt_raw || 'Keine Antwort erhalten'}</pre>
-      `;
-    }
-  } catch (err) {
-    output.innerHTML = "❌ Fehler: " + err.message;
+     output.innerHTML = `
+  ❌ Fehler beim Abrufen von GPT:<br>
+  <pre>${err.message}</pre>
+  <br>Bitte prüfe, ob der OpenAI-Key aktiv ist und das Modell verfügbar ist.
+`;
   }
 }
