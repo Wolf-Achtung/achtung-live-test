@@ -64,6 +64,10 @@ Hier ist der zu prüfende Text:
         return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
     except Exception as e:
         return jsonify({ "error": str(e) }), 500
+@app.route("/", methods=["GET"])
+def home():
+    return "🚀 Achtung.live API läuft!"
 
 if __name__ == "__main__":
     app.run(debug=True)
+
