@@ -51,7 +51,7 @@ Hier ist der zu prüfende Text:
             model="text-davinci-003",
             prompt=prompt,
             temperature=0.7,
-            max_tokens=900,
+            max_tokens=1000,
             top_p=1,
             frequency_penalty=0.3,
             presence_penalty=0.1
