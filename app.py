@@ -4,74 +4,62 @@ import os
 import openai
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-if not openai.api_key:
-    raise ValueError("❌ OPENAI_API_KEY fehlt – bitte in Railway setzen!")
-
-@app.route("/", methods=["GET"])
-def home():
-    return "🚀 Achtung.live API läuft!"
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
 
-    system_prompt = """
-Du bist ein empathischer Datenschutz-Coach mit medizinischem Feingefühl. Deine Aufgabe ist es, den folgenden Text auf sensible Inhalte zu prüfen und – falls nötig – sichere, bedeutungserhaltende Alternativen vorzuschlagen.
+    prompt = f"""
+Sie sind ein auf Datenschutz spezialisierter Textanalyst. Ihre Aufgabe ist es, den folgenden Text zu analysieren und sensibel zu bewerten:
 
-Achte besonders auf:
-- medizinische Informationen (Krankheiten, Diagnosen, Symptome, Medikamente)
-- Namen von Ärzt:innen oder Kliniken
-- finanzielle Details (z. B. Gehalt, Kontonummern, Kredite)
-- emotionale oder intime Aussagen (z. B. über Beziehung, mentale Gesundheit)
-- persönliche Identifizierbarkeit (Namen, Telefonnummern, Adressen)
-- vertrauliche Unternehmensinformationen oder Geheimnisse
+1. Welche Arten vertraulicher Daten enthält der Text?
+2. Wie hoch ist das Datenschutzrisiko? (Ampel-Kennzeichnung)
+3. Warum ist der Inhalt unter Datenschutzaspekten sensibel?
+4. Formulieren Sie einen konkreten, praktischen Tipp für die betroffene Person (z. B. wie man Inhalte anonymisieren oder sicher verschicken kann). Der Hinweis soll klar, leicht verständlich und direkt anwendbar sein.
+5. Bieten Sie **einen Rewrite-Vorschlag** an – aber nur, wenn Sie diesen für sinnvoll und hilfreich erachten.
+6. Verwenden Sie ausschließlich Sie-Form, verzichten Sie auf Icons außer der Datenschutz-Ampel.
+7. Betonen Sie vulnerable Gruppen wie Kinder, ältere Menschen, Menschen mit psychischen Belastungen und Personen mit Sprachbarrieren besonders vorsichtig.
 
-Wenn du sensible Inhalte findest, analysiere sie kurz und formuliere drei Rewrite-Vorschläge in verschiedenen Tonalitäten. Achte dabei auf Empathie, Anonymität und Klarheit.
+Struktur der Ausgabe:
 
 ---
-🛑 Sensible Inhalte erkannt:
-[List der sensiblen Begriffe/Stellen im Originaltext]
+**Erkannte Datenarten:**  
+[List der sensiblen Inhalte]
 
-🔁 Rewrite-Vorschläge:
+**Datenschutz-Risiko:** 🟢 / 🟡 / 🔴
 
-1. 🌱 Diskret-neutral  
-Eine anonyme, aber verständliche Variante – für maximale Privatsphäre.
+**Bedeutung:**  
+[Warum ist dieser Inhalt kritisch?]
 
-2. 💬 Locker-umgangssprachlich  
-Eine lockere, alltagsnahe Version – für informelle Kommunikation.
+**achtung.live-Empfehlung:**  
+[Praxis-Tipp – inklusive Link zu seriöser Info (z. B. datenschutz.org oder bund.de)]
 
-3. 🏥 Professionell & medizinisch korrekt  
-Eine sachliche, fachlich fundierte Version – für professionelle Kontexte.
+**Optionaler Vorschlag zur Umformulierung:**  
+[Nur wenn wirklich hilfreich – eine datenschutzsensible, empathische Version des Originaltexts.]
 
-✨ Bonus (optional):  
-Erkläre in 1–2 Sätzen, warum der Originaltext datenschutzrechtlich problematisch war – und wie deine Rewrites helfen, das Risiko zu reduzieren.
-"""
+---
+Hier ist der zu prüfende Text:  
+\"\"\"{user_input}\"\"\"
+    """
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Alternativ: "gpt-4o"
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Bitte prüfe folgenden Text:\n\n{user_input}"}
-            ],
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
             temperature=0.7,
-            max_tokens=800,
+            max_tokens=900,
             top_p=1,
             frequency_penalty=0.3,
             presence_penalty=0.1
         )
-
-        gpt_output = response.choices[0].message.content.strip()
-        suggestions = gpt_output.split("\n\n")
-        return jsonify({ "suggestions": suggestions, "gpt_raw": gpt_output })
-
+        gpt_output = response.choices[0].text.strip()
+        return jsonify({ "gpt_output": gpt_output })
     except Exception as e:
-        print("❌ GPT-Fehler:", str(e))
-        return jsonify({ "error": str(e) }), 500
+        return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" })
 
 if __name__ == "__main__":
     app.run(debug=True)
