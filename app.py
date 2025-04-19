@@ -6,7 +6,7 @@ import openai
 app = Flask(__name__)
 CORS(app)
 
-# OpenAI-Key aus Environment Variable
+# API-Key aus Umgebungsvariable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/debug-gpt", methods=["POST"])
@@ -49,25 +49,20 @@ Hier ist der zu prüfende Text:
     """
 
     try:
-        # GPT-Antwort holen
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
+        # GPT-4 ChatCompletion verwenden
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=1000,
-            top_p=1,
-            frequency_penalty=0.3,
-            presence_penalty=0.1
+            max_tokens=1000
         )
-        gpt_output = response.choices[0].text.strip()
+        gpt_output = response.choices[0].message["content"].strip()
 
-        # Log in Railway anzeigen
+        # Ausgabe in Log & Antwort
         print("✅ GPT-Antwort:", gpt_output)
-
         return jsonify({ "gpt_output": gpt_output })
 
     except Exception as e:
-        # Fehler in Railway Logs & im Frontend anzeigen
         print("❌ GPT-Fehler:", str(e))
         return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" })
 
