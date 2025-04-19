@@ -6,6 +6,7 @@ import openai
 app = Flask(__name__)
 CORS(app)
 
+# OpenAI-Key aus Environment Variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/debug-gpt", methods=["POST"])
@@ -13,6 +14,7 @@ def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
 
+    # GPT-Prompt
     prompt = f"""
 Sie sind ein auf Datenschutz spezialisierter Textanalyst. Ihre Aufgabe ist es, den folgenden Text zu analysieren und sensibel zu bewerten:
 
@@ -47,6 +49,7 @@ Hier ist der zu prüfende Text:
     """
 
     try:
+        # GPT-Antwort holen
         response = openai.Completion.create(
             model="text-davinci-003",
             prompt=prompt,
@@ -57,8 +60,15 @@ Hier ist der zu prüfende Text:
             presence_penalty=0.1
         )
         gpt_output = response.choices[0].text.strip()
+
+        # Log in Railway anzeigen
+        print("✅ GPT-Antwort:", gpt_output)
+
         return jsonify({ "gpt_output": gpt_output })
+
     except Exception as e:
+        # Fehler in Railway Logs & im Frontend anzeigen
+        print("❌ GPT-Fehler:", str(e))
         return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" })
 
 if __name__ == "__main__":
