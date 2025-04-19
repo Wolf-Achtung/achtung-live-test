@@ -40,7 +40,7 @@ Struktur der Ausgabe:
 [Praxis-Tipp – inklusive Link zu seriöser Info (z. B. datenschutz.org oder bund.de)]
 
 **Optionaler Vorschlag zur Umformulierung:**  
-[Nur wenn wirklich hilfreich – eine datenschutzsensible, empathische Version des Originaltexts.]
+[Nur wenn wirklich hilfreich – eine sichere, datenschutzsensible, empathische Version des Originaltexts.]
 
 ---
 Hier ist der zu prüfende Text:  
