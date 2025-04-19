@@ -6,15 +6,14 @@ import openai
 app = Flask(__name__)
 CORS(app)
 
-# API-Key aus Umgebungsvariable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Neue OpenAI-Client-Struktur ab openai>=1.0.0
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
 
-    # GPT-Prompt
     prompt = f"""
 Sie sind ein auf Datenschutz spezialisierter Textanalyst. Ihre Aufgabe ist es, den folgenden Text zu analysieren und sensibel zu bewerten:
 
@@ -26,7 +25,7 @@ Sie sind ein auf Datenschutz spezialisierter Textanalyst. Ihre Aufgabe ist es, d
 6. Verwenden Sie ausschließlich Sie-Form, verzichten Sie auf Icons außer der Datenschutz-Ampel.
 7. Betonen Sie vulnerable Gruppen wie Kinder, ältere Menschen, Menschen mit psychischen Belastungen und Personen mit Sprachbarrieren besonders vorsichtig.
 
-Struktur dieser Ausgabe:
+Struktur der Ausgabe:
 
 ---
 **Erkannte Datenarten:**  
@@ -49,16 +48,13 @@ Hier ist der zu prüfende Text:
     """
 
     try:
-        # GPT-4 ChatCompletion verwenden
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=1000
         )
-        gpt_output = response.choices[0].message["content"].strip()
-
-        # Ausgabe in Log & Antwort
+        gpt_output = response.choices[0].message.content.strip()
         print("✅ GPT-Antwort:", gpt_output)
         return jsonify({ "gpt_output": gpt_output })
 
