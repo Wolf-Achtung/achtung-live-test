@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultContainer.innerHTML = "";
     emojiWarningsContainer.innerHTML = "";
     loader.style.display = "block";
+    document.getElementById("rewriteSection").style.display = "none";
 
     try {
       const response = await fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
@@ -56,8 +57,21 @@ document.addEventListener("DOMContentLoaded", () => {
       loader.style.display = "none";
 
       if (data.gpt_output) {
-        resultContainer.innerHTML = `<div>${data.gpt_output}</div>`;
+        const output = data.gpt_output;
+
+        // Links im Markdown-Stil zu echten HTML-Links umwandeln
+        const htmlOutput = output.replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        resultContainer.innerHTML = `<div>${htmlOutput}</div>`;
         showEmojiWarnings(text);
+
+        // Rewrite-Vorschlag extrahieren
+        const match = output.match(/(?:\*\*Tipp:\*\*|Rewrite-Vorschlag:?)\s*([\s\S]*?)(?:\n|$)/i);
+        if (match && match[1]) {
+          const clean = match[1].trim();
+          document.getElementById("rewriteText").innerText = clean;
+          document.getElementById("rewriteSection").style.display = "block";
+        }
       } else {
         resultContainer.innerHTML = "⚠️ Keine Vorschläge gefunden.";
       }
@@ -71,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   userTextArea.addEventListener("input", () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(analyzeText, 1000); // Auto-Analyse nach 1 Sekunde
+    debounceTimer = setTimeout(analyzeText, 1000);
   });
 
   languageSelect.addEventListener("change", () => {
@@ -79,17 +93,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const intro = document.getElementById("introText");
 
     if (lang === "en") {
-      intro.textContent = "Rewrite & privacy check with emoji analysis";
+      intro.textContent = "Data protection analysis and rewriting (incl. emojis)";
       analyzeButton.textContent = "Start analysis";
-      consentCheckbox.nextSibling.textContent = " I agree to the analysis as per the ";
     } else if (lang === "fr") {
-      intro.textContent = "Révision & vérification de confidentialité avec emoji";
-      analyzeButton.textContent = "Démarrer l'analyse";
-      consentCheckbox.nextSibling.textContent = " J'accepte l'analyse de mon texte selon la ";
+      intro.textContent = "Analyse de confidentialité et réécriture (avec emojis)";
+      analyzeButton.textContent = "Lancer l'analyse";
     } else {
-      intro.textContent = "Rewrite- & Emoji-Datenschutzanalyse";
+      intro.textContent = "Datenschutzanalyse und Korrektur (inkl. Emojis)";
       analyzeButton.textContent = "Analyse starten";
-      consentCheckbox.nextSibling.textContent = " Ich stimme der Verarbeitung meiner Eingabe gemäß der ";
     }
+  });
+
+  // 📋 Kopierfunktion für Rewrite
+  document.getElementById("copyRewriteBtn").addEventListener("click", () => {
+    const rewrite = document.getElementById("rewriteText").innerText;
+    navigator.clipboard.writeText(rewrite)
+      .then(() => alert("✅ Vorschlag in Zwischenablage kopiert!"))
+      .catch(() => alert("❌ Fehler beim Kopieren."));
   });
 });
