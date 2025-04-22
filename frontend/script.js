@@ -1,42 +1,41 @@
-async function analyzeText() {
-  const text = document.getElementById("inputText").value;
-  const output = document.getElementById("output");
-  output.innerHTML = "⏳ GPT denkt nach...";
+document.addEventListener("DOMContentLoaded", function () {
+  const analyzeButton = document.getElementById("analyzeButton");
+  const resultContainer = document.getElementById("result");
+  const loader = document.getElementById("loader");
 
-  try {
-    const res = await fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text })
-    });
+  analyzeButton.addEventListener("click", async () => {
+    const userText = document.getElementById("userText").value.trim();
 
-    const data = await res.json();
+    resultContainer.innerHTML = "";
+    loader.style.display = "block";
 
-    // 🔎 Debug-Log in der Konsole
-    console.log("GPT-Rohantwort:", data.gpt_raw);
-    console.log("Antwortobjekt:", data);
-
-    // ✅ Ausgabe – wenn GPT-Vorschläge gefunden wurden
-    if (data.suggestions && data.suggestions.length > 0) {
-      output.innerHTML = data.suggestions.map((s, i) => `
-        <div><strong>🔁 Vorschlag ${i + 1}:</strong><br>${s}</div><br>
-      `).join("");
-    } else {
-      // ⚠️ Keine Vorschläge – zeige GPT-Rohantwort
-      output.innerHTML = `
-        ⚠️ Keine Vorschläge gefunden.<br><br>
-        <strong>GPT-Rohantwort:</strong><br>
-        <pre>${data.gpt_raw || 'Keine Antwort erhalten'}</pre>
-      `;
+    if (!userText) {
+      loader.style.display = "none";
+      resultContainer.innerHTML = "⚠️ Bitte einen Text eingeben.";
+      return;
     }
-  } catch (err) {
-    // ❌ Bei technischem Fehler (z. B. Fetch oder Backend down)
-    output.innerHTML = `
-      ❌ Fehler beim Abrufen von GPT:<br>
-      <pre>${err.message}</pre>
-      <br>Bitte prüfe, ob dein OpenAI-Key gültig ist und dein Backend läuft.
-    `;
-  }
-}
+
+    try {
+      const response = await fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: userText })
+      });
+
+      const data = await response.json();
+      loader.style.display = "none";
+
+      if (data.gpt_output) {
+        resultContainer.innerHTML = `<pre style="white-space: pre-wrap;">${data.gpt_output}</pre>`;
+      } else {
+        resultContainer.innerHTML = "⚠️ Keine Vorschläge gefunden.<br><br><strong>GPT-Rohantwort:</strong><br>Keine Antwort erhalten.";
+      }
+    } catch (error) {
+      loader.style.display = "none";
+      console.error("Fehler beim Abrufen:", error);
+      resultContainer.innerHTML = `❌ Fehler beim Verbinden mit dem Server.<br>${error.message}`;
+    }
+  });
+});
