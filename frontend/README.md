@@ -15,5 +15,5 @@ Dieses Frontend dient als Eingabemaske für die GPT-basierte Rewrite-API `/debug
 
 ## Verwendung
 
-Einfach `index.html` lokal öffnen oder mit Netlify deployen.
+Einfach `index.html` lokal öffnen oder mit Netlify direkt deployen.
 Das Frontend erwartet die API `/debug-gpt` auf demselben Host (anpassbar in JS).
