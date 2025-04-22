@@ -1,93 +1,47 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[achtung.live] Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #fff;
-      color: #002244;
-      max-width: 800px;
-      margin: auto;
-      padding: 30px;
-    }
-    h1 { color: #cc0000; }
-    textarea {
-      width: 100%; height: 120px;
-      font-size: 1em; padding: 12px;
-      margin: 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      background: #cc0000; color: white;
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #loader {
-      display: none;
-      margin: 12px 0;
-      font-style: italic;
-    }
-    #result { margin-top: 30px; white-space: pre-wrap; }
-    #emojiWarnings div {
-      margin-top: 12px;
-      background: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 12px;
-      border-radius: 4px;
-    }
-    a { color: #cc0000; }
-    label, select { display: block; margin-top: 12px; }
-    footer {
-      margin-top: 60px;
-      font-size: 0.9em;
-      color: #666;
-      border-top: 1px solid #ccc;
-      padding-top: 20px;
-    }
+    body { font-family: Arial, sans-serif; padding: 2em; }
+    #loader { font-style: italic; color: #555; margin-top: 1em; display: none; }
+    .gpt-label { color: #cc0000; font-weight: bold; display: block; margin-top: 1em; }
+    #rewriteSection { display: none; margin-top: 1em; background: #f3f3f3; padding: 1em; border-left: 4px solid #cc0000; }
+    #emojiWarnings div { margin: 0.5em 0; padding: 0.5em; background: #fffbe6; border: 1px solid #e6cf00; }
   </style>
 </head>
 <body>
-  <h1>[achtung.live]</h1>
-  <p id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</p>
 
-  <label for="languageSelect">🌐 Sprache wählen:</label>
+  <h1 id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
+
+  <label for="userText">🔎 Zu analysierender Text:</label><br>
+  <textarea id="userText" rows="6" style="width:100%; margin-top:0.5em;"></textarea><br><br>
+
   <select id="languageSelect">
     <option value="de">Deutsch</option>
     <option value="en">English</option>
     <option value="fr">Français</option>
   </select>
 
-  <textarea id="userText" placeholder="Geben Sie Ihren Text hier ein..."></textarea>
+  <br><br>
+  <input type="checkbox" id="consentCheckbox" />
+  <label for="consentCheckbox">Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
 
-  <label>
-    <input type="checkbox" id="consentCheckbox" />
-    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="#" target="_blank">Datenschutzerklärung</a> zu.
-  </label>
-
+  <br><br>
   <button id="analyzeButton">Analyse starten</button>
-<div id="loader" style="display: none;">Analyse läuft, Optimierung wird erstellt...</div>
-  <div id="result"></div>
 
+  <div id="loader"></div>
+
+  <div id="result" style="margin-top:2em;"></div>
   <div id="emojiWarnings"></div>
 
-  <div id="rewriteSection" style="display: none; margin-top: 30px;">
-    <h3>📋 Rewrite-Vorschlag:</h3>
-    <div id="rewriteText" style="background: #eef; padding: 12px; border-radius: 6px; margin-bottom: 8px;"></div>
-    <button id="copyRewriteBtn">✅ Vorschlag kopieren</button>
+  <div id="rewriteSection">
+    <strong>Vorschlag zum Kopieren:</strong><br>
+    <pre id="rewriteText"></pre>
+    <button id="copyRewriteBtn">📋 Vorschlag kopieren</button>
   </div>
-
-  <footer>
-    ℹ️ Diese Seite verwendet GPT-basierte KI zur Textanalyse gemäß <strong>EU AI Act</strong>. Ihre Eingabe wird anonymisiert verarbeitet. Mehr Informationen: 
-Mehr Informationen: <a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:52021PC0206" target="_blank">EU AI Act</a>
-
-  </footer>
 
   <script src="script.js"></script>
 </body>
