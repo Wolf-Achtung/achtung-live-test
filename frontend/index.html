@@ -3,123 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>[achtung.live] Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
+  <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
+    :root {
+      --primary: #c60000;
+      --accent: #0a1a2f;
+      --bg: #ffffff;
+      --link: #0044cc;
+      --light: #f9f9f9;
+    }
+
     body {
-      font-family: Inter, sans-serif;
-      padding: 2em;
-      background: #ffffff;
-      color: #001b44;
-      line-height: 1.6;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--accent);
+      padding: 20px;
+      margin: auto;
+      max-width: 800px;
     }
+
     h1 {
-      color: #001b44;
-    }
-    #logo {
-      width: 220px;
+      font-size: 1.6em;
       margin-bottom: 1em;
     }
-    #loader {
-      font-style: italic;
-      color: #555;
-      margin-top: 1em;
-      display: none;
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
     }
-    .gpt-label {
-      color: #cc0000;
-      font-weight: bold;
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      cursor: pointer;
+      width: 100%;
+      touch-action: manipulation;
+    }
+
+    label {
+      font-size: 1rem;
       display: block;
       margin-top: 1em;
     }
-    #rewriteSection {
-      display: none;
-      margin-top: 2em;
-      background: #f9f9f9;
-      padding: 1em;
-      border-left: 4px solid #cc0000;
-      border-radius: 4px;
+
+    input[type="checkbox"] {
+      transform: scale(1.4);
+      margin-right: 10px;
     }
-    #emojiWarnings div {
-      margin: 0.5em 0;
-      padding: 0.5em;
-      background: #fffbe6;
-      border: 1px solid #e6cf00;
-      border-radius: 3px;
-    }
-    textarea {
-      font-family: inherit;
-      font-size: 1rem;
-      padding: 0.5em;
-    }
-    button {
-      background: #cc0000;
-      color: white;
-      padding: 0.6em 1.2em;
-      border: none;
-      cursor: pointer;
+
+    #loader {
+      margin-top: 10px;
       font-weight: bold;
-      margin-top: 1em;
+      color: var(--accent);
     }
-    button:hover {
-      background: #990000;
+
+    #resultBox {
+      margin-top: 25px;
+      padding: 20px;
+      background: var(--light);
+      border-left: 4px solid var(--primary);
+      border-radius: 5px;
+      line-height: 1.6;
     }
-    a {
-      color: #001b44;
+
+    #resultBox strong {
+      color: var(--primary);
+    }
+
+    #resultBox a {
+      color: var(--link);
       text-decoration: underline;
     }
-    select {
-      padding: 0.3em;
-      font-size: 1em;
+
+    .flag-select {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
     }
-    label {
-      font-weight: 500;
+
+    .flag-select img {
+      width: 28px;
+      height: 20px;
+      margin-right: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
     }
-    .tooltip-box {
-      position: absolute;
-      background: #fffbe6;
-      color: #333;
-      padding: 8px;
-      border: 1px solid #aaa;
-      font-size: 14px;
-      max-width: 300px;
-      z-index: 1000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+    .flag-select img.active {
+      border-color: var(--primary);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.4em;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+
+      textarea {
+        height: 100px;
+      }
+
+      .flag-select img {
+        width: 26px;
+        height: 18px;
+      }
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="[achtung.live]" id="logo" />
-  <h1 id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
+  <h1>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
 
-  <label for="userText">🔎 Zu analysierender Text:</label><br>
-  <textarea id="userText" rows="6" style="width:100%; margin-top:0.5em;"></textarea><br><br>
+  <label for="text">🔎 Zu analysierender Text:</label>
+  <textarea id="text" placeholder="Gib deinen Text hier ein…"></textarea>
 
-  <select id="languageSelect">
-    <option value="de">Deutsch</option>
-    <option value="en">English</option>
-    <option value="fr">Français</option>
-  </select>
-
-  <br><br>
-  <input type="checkbox" id="consentCheckbox" />
-  <label for="consentCheckbox">
-    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
-    <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
-  </label>
-
-  <br><br>
-  <button id="analyzeButton">Analyse starten</button>
-  <div id="loader"></div>
-
-  <div id="result" style="margin-top:2em;"></div>
-  <div id="emojiWarnings"></div>
-
-  <div id="rewriteSection">
-    <strong>Vorschlag zum Kopieren:</strong><br>
-    <pre id="rewriteText"></pre>
-    <button id="copyRewriteBtn">📋 Vorschlag kopieren</button>
+  <div class="flag-select">
+    <img src="https://flagcdn.com/w40/de.png" alt="Deutsch" onclick="setLanguage('de')" id="flag-de" />
+    <img src="https://flagcdn.com/w40/gb.png" alt="English" onclick="setLanguage('en')" id="flag-en" />
+    <img src="https://flagcdn.com/w40/fr.png" alt="Français" onclick="setLanguage('fr')" id="flag-fr" />
   </div>
 
-  <script src="script.js"></script>
+  <input type="hidden" id="language" value="de" />
+
+  <label>
+    <input type="checkbox" id="consent">
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="#">Datenschutzerklärung</a> zu.
+  </label>
+
+  <p id="loader"></p>
+  <div id="result"></div>
+
+  <script>
+    let debounceTimer;
+
+    function setLanguage(lang) {
+      document.getElementById("language").value = lang;
+      document.querySelectorAll(".flag-select img").forEach(img => img.classList.remove("active"));
+      document.getElementById("flag-" + lang).classList.add("active");
+    }
+
+    function analyzeText() {
+      const text = document.getElementById("text").value.trim();
+      const consent = document.getElementById("consent").checked;
+      const loader = document.getElementById("loader");
+      const result = document.getElementById("result");
+
+      if (!consent) {
+        loader.innerText = "❗ Bitte der Analyse zustimmen.";
+        result.innerHTML = "";
+        return;
+      }
+
+      if (!text) {
+        loader.innerText = "";
+        result.innerHTML = "";
+        return;
+      }
+
+      loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
+      result.innerHTML = "";
+
+      fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text,
+          language: document.getElementById("language").value
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          loader.innerText = "";
+          if (data.suggestions) {
+            result.innerHTML = "<div id='resultBox'>" + data.suggestions.join("<br><br>") + "</div>";
+          } else {
+            result.innerHTML = "<div id='resultBox'>⚠️ Keine Vorschläge gefunden.<br><br><strong>GPT-Rohantwort:</strong><br>" + (data.gpt_raw || "Keine Antwort erhalten") + "</div>";
+          }
+        })
+        .catch((err) => {
+          loader.innerText = "❌ Fehler: " + err.message;
+        });
+    }
+
+    document.getElementById("text").addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(analyzeText, 1200); // Analyse nach 1.2 Sekunden Inaktivität
+    });
+  </script>
 </body>
 </html>
