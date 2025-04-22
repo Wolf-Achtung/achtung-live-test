@@ -31,13 +31,6 @@
       display: block;
       margin-top: 1em;
     }
-.rubrik {
-  color: #c60000; /* Achtung.live Rot */
-  font-weight: bold;
-  display: block;
-  margin-top: 1.2em;
-  margin-bottom: 0.3em;
-}
     #rewriteSection {
       display: none;
       margin-top: 2em;
@@ -81,30 +74,26 @@
     label {
       font-weight: 500;
     }
-.tooltip-box {
-  position: absolute;
-  background: #fffbe6;
-  color: #333;
-  padding: 8px;
-  border: 1px solid #aaa;
-  font-size: 14px;
-  max-width: 300px;
-  z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    .tooltip-box {
+      position: absolute;
+      background: #fffbe6;
+      color: #333;
+      padding: 8px;
+      border: 1px solid #aaa;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-
-  <!-- 🔺 LOGO -->
   <img src="logo.png" alt="[achtung.live]" id="logo" />
-
   <h1 id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
 
   <label for="userText">🔎 Zu analysierender Text:</label><br>
   <textarea id="userText" rows="6" style="width:100%; margin-top:0.5em;"></textarea><br><br>
 
-  <!-- 🌐 Sprache -->
   <select id="languageSelect">
     <option value="de">Deutsch</option>
     <option value="en">English</option>
@@ -112,7 +101,6 @@
   </select>
 
   <br><br>
-  <!-- ✅ DSGVO -->
   <input type="checkbox" id="consentCheckbox" />
   <label for="consentCheckbox">
     Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
@@ -121,14 +109,11 @@
 
   <br><br>
   <button id="analyzeButton">Analyse starten</button>
-
   <div id="loader"></div>
 
-  <!-- 💬 Ausgabe -->
-<div id="result" class="result-output"></div>
+  <div id="result" style="margin-top:2em;"></div>
   <div id="emojiWarnings"></div>
 
-  <!-- 📋 Vorschlag -->
   <div id="rewriteSection">
     <strong>Vorschlag zum Kopieren:</strong><br>
     <pre id="rewriteText"></pre>
