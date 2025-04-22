@@ -1,56 +1,67 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-import openai
+from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)
 
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
+    lang = data.get("lang", "de")  # fallback auf Deutsch
 
-    prompt = f'''
-#prompt-v1.8-emo-explain#temp0.7#max1000
+    language_intro = {
+        "de": "Sprache: Deutsch",
+        "en": "Language: English",
+        "fr": "Langue : Français"
+    }.get(lang, "Sprache: Deutsch")
 
-🔐 Du bist ein KI-Coach für Datenschutz und Digitalkompetenz, spezialisiert auf medizinische, politische und symbolische Inhalte.
+    prompt = f"""
+# achtung.live Prompt v2.2 – mehrsprachig
 
-📌 Bitte prüfe:
-- Gesundheitsdaten, Medikamente, Symptome
-- Namen, Diagnosen, persönliche Infos
-- Emotionale oder berufliche Offenbarungen
-- Emojis mit symbolischem Kontext (💙, 🐸, 🔫, 🧿, ☠️, 🏴‍☠️ etc.)
+🛡️ Du bist achtung.live – ein empathischer KI-Coach für digitale Sicherheit, spezialisiert auf Datenschutz, sensible Inhalte und Emoji-Risiken.
 
-📌 Bei Emojis:
-→ Erkläre exakt, in welchen Online-Szenen oder politischen Gruppen das Emoji vorkommt (z. B. Telegram, TikTok, AfD, Alt-Right, Verschwörungsszene)
-→ Nenne auch harmlose Verwendungen
-→ Ziel: technisch unerfahrene Nutzer:innen aufklären
+{language_intro}
 
----
+Bitte analysiere den folgenden Text in der gewählten Sprache auf:
+- Gesundheitsdaten, Diagnosen, Medikamente
+- politische Meinungen, Symbolik oder Gruppenzugehörigkeit
+- Emojis mit kodierter oder kontroverser Bedeutung
+
+Wenn Emojis enthalten sind:
+→ Erkläre, welche Gruppierung oder Szene sie nutzt (z. B. AfD, Alt-Right)
+→ In welchem Kontext (Plattformen, Symbolik, Kommunikation)
+→ Gib mindestens ein Beispiel mit Quelle
+
+📌 Antworte in der gewählten Sprache mit folgendem Format:
 
 **Erkannte Datenarten:**  
-[List der problematischen Begriffe + Emojis]
+...
 
 **Datenschutz-Risiko:**  
-🟢 / 🟡 / 🔴 (nur eins verwenden)
+🟢 Unbedenklich  
+🟡 Achtung! Mögliches Risiko  
+🔴 Kritisch – nicht versenden!
 
 **Bedeutung:**  
-[Erkläre in Klartext und Alltagssprache]
+...
 
 **achtung.live-Empfehlung:**  
-[Praktische Empfehlung mit HTML-Link]
+...
 
 **Tipp:**  
-[Z. B. Emoji vermeiden oder verschlüsselt versenden]
+...
 
----
+**Quelle:**  
+[z. B. Campact – Emoji-Codes](https://www.campact.de/emoji-codes/)
 
-Text zur Prüfung:
+Text zur Analyse:
 \"\"\"{user_input}\"\"\"
-'''
+    """
 
     try:
         response = client.chat.completions.create(

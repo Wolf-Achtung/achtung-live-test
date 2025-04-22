@@ -1,27 +1,32 @@
 {
   "💙": {
     "title": "Blaues Herz 💙",
-    "text": "Erkennungszeichen für AfD & rechtspopulistische Gruppen (z. B. Telegram, TikTok). Auch in Ukraine-Kontext verwendet – Kontext ist entscheidend.",
+    "text": "Wird u. a. von AfD-nahen Accounts als visuelles Bekenntnis genutzt (Telegram-Profilnamen, TikTok-Kommentare). Auch für Ukraine-Solidarität gebräuchlich.",
+    "group": "AfD, rechtspopulistisch, Ukraine-Kontext",
     "link": "https://www.campact.de/emoji-codes/"
   },
   "🐸": {
     "title": "Frosch 🐸",
-    "text": "Symbol der Alt-Right (Pepe the Frog). Wird in rassistischen Memes und rechtsextremer Online-Kultur verwendet.",
+    "text": "Symbol der Alt-Right (Pepe the Frog). International verbreitet in extremistischen Memes und Online-Hasskultur.",
+    "group": "Alt-Right, rechtsextrem, Meme-Foren",
     "link": "https://www.adl.org/resources/hate-symbol/pepe-the-frog"
   },
   "🖊️": {
     "title": "Kugelschreiber 🖊️",
-    "text": "Wird von Holocaustleugnern verwendet – Bezug auf angeblich gefälschte Einträge in Anne Franks Tagebuch.",
+    "text": "Verwendung bei Holocaustleugnern – Vorwurf: Tagebuch von Anne Frank sei mit Kuli geschrieben = angeblich Fälschung.",
+    "group": "Holocaustleugner, NS-Revisionisten",
     "link": "https://www.linkedin.com/pulse/kugelschreiber-als-holocaust-leugnung-emoji-marc-raschke/"
   },
   "🚪": {
     "title": "Tür 🚪",
-    "text": "Symbol für Leugnung der Gaskammern in Auschwitz. In der Szene als 'Holztür-Verschwörung' bekannt.",
+    "text": "Verwendung in 'Holztürverschwörung' – Leugnung der Gaskammern in Auschwitz. Symbol in rechten Telegram-Kanälen.",
+    "group": "Reichsbürger, Geschichtsrevisionisten",
     "link": "https://www.instagram.com/stories/highlights/18100492476105800/"
   },
   "⚡️⚡️": {
     "title": "Doppelblitz ⚡️⚡️",
-    "text": "Wird als Ersatz für SS-Rune genutzt – in vielen Ländern verboten. Häufig in Neo-Nazi-Codes.",
+    "text": "Ersatz für SS-Runen, oft in Neonazi-Profilen. Verwendung verboten.",
+    "group": "Neo-Nazis, SS-Verherrlichung",
     "link": "https://de.wikipedia.org/wiki/Sigrune"
   }
 }
