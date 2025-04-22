@@ -1,73 +1,12 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import os
-import openai
-import json
-import re
-
-app = Flask(__name__)
-CORS(app)
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# JSON laden
-with open("trusted_links.json", "r", encoding="utf-8") as f:
-    trusted_links = json.load(f)
-
-def get_allowed_urls():
-    return [entry["url"] for entry in trusted_links.values()]
-
-# Links in GPT-Antwort prüfen
-def sanitize_links(text):
-    found_links = re.findall(r'\[([^\]]+)]\(([^)]+)\)', text)
-    allowed_urls = get_allowed_urls()
-    for label, url in found_links:
-        if url not in allowed_urls:
-            replacement = f"❌ {label} – Link entfernt (nicht autorisiert)"
-            text = text.replace(f"[{label}]({url})", replacement)
-    return text
-
-@app.route("/debug-gpt", methods=["POST"])
-def debug_gpt():
-    data = request.get_json()
-    user_input = data.get("text", "")
-    user_lang = data.get("lang", "de")
-
-    # GPT-Prompt mit klaren Quellen
-    prompt = f"""
-Du bist ein KI-System für Datenschutzanalyse. Untersuche den folgenden Text auf Risiken, sensible Inhalte, Emojis mit politischem Kontext und formuliere Empfehlungen.
-
-⚠️ Verwende ausschließlich diese geprüften Links:
-{"".join([f"- {entry['label']}: {entry['url']}\n" for entry in trusted_links.values()])}
-
-Struktur der Antwort:
-**Erkannte Datenarten:**  
-**Datenschutz-Risiko:**  
-**Bedeutung:**  
-**achtung.live-Empfehlung:**  
-**Tipp:**  
-**Quelle:** (nur aus obiger Liste, als Markdown-Link)
-
-Sprache: {user_lang.upper()}
-Text: \"\"\"{user_input}\"\"\"
-"""
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=1000,
-        )
-
-        gpt_output = response.choices[0].message.content.strip()
-        print("\n🧠 GPT-Rohantwort:\n", gpt_output)
-
-        checked_output = sanitize_links(gpt_output)
-        return jsonify({"gpt_output": checked_output})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
+[
+  "bund.de",
+  "campact.de",
+  "datenschutz.org",
+  "netzpolitik.org",
+  "openai.com",
+  "who.int",
+  "cdc.gov",
+  "europa.eu",
+  "bsi.bund.de",
+  "gesundheitsinformation.de"
+]
