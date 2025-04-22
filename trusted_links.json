@@ -1,12 +1,11 @@
 [
-  "bund.de",
-  "campact.de",
-  "datenschutz.org",
-  "netzpolitik.org",
-  "openai.com",
-  "who.int",
-  "cdc.gov",
-  "europa.eu",
-  "bsi.bund.de",
-  "gesundheitsinformation.de"
+  { "url": "https://www.bfdi.bund.de", "label": "BfDI – Bundesdatenschutzbeauftragter" },
+  { "url": "https://www.datenschutzkonferenz-online.de", "label": "DSK – Datenschutzkonferenz" },
+  { "url": "https://www.w3.org/WAI/", "label": "W3C – Web Accessibility Initiative" },
+  { "url": "https://campact.de/emoji-codes", "label": "Campact – Emoji-Codes" },
+  { "url": "https://www.bsi.bund.de", "label": "BSI – Bundesamt für Sicherheit in der Informationstechnik" },
+  { "url": "https://www.dsgvo-gesetz.de", "label": "DSGVO-Gesetz.de" },
+  { "url": "https://www.netzpolitik.org", "label": "netzpolitik.org" },
+  { "url": "https://www.bund.de", "label": "bund.de – Datenschutz im Staat" },
+  { "url": "https://digitalstrategie-deutschland.de", "label": "Digitalstrategie Deutschland" }
 ]
