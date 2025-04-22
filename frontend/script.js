@@ -1,4 +1,4 @@
-const backendUrl = "https://web-production-f8648.up.railway.app"; // deine API-URL
+const backendUrl = "https://web-production-f8648.up.railway.app"; // aktuelle API-URL
 
 async function startAnalysis() {
   const input = document.getElementById("userInput").value.trim();
@@ -17,7 +17,7 @@ async function startAnalysis() {
   }
 
   try {
-    const response = await fetch(`${backendUrl}/debug-gpt`, {
+    const response = await fetch(`${backendUrl}/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: input, language: lang }),

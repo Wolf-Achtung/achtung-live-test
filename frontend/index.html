@@ -2,106 +2,106 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
     body {
-      font-family: "Inter", sans-serif;
-      background-color: #f9f9f9;
-      color: #002244;
+      font-family: Inter, sans-serif;
+      background: #ffffff;
+      color: #222;
+      margin: 0;
       padding: 2rem;
       line-height: 1.6;
     }
 
     textarea {
       width: 100%;
-      max-width: 720px;
-      height: 180px;
+      height: 120px;
       font-size: 1rem;
       padding: 1rem;
+      margin-top: 1rem;
       border: 1px solid #ccc;
       border-radius: 4px;
-      margin-bottom: 1rem;
-      font-family: inherit;
     }
 
-    select {
+    select, label {
+      margin-top: 1rem;
+      display: block;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
       font-size: 1rem;
-      padding: 0.4rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      margin-top: 1rem;
+      background-color: #0052cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    .checkbox-block {
+    button:hover {
+      background-color: #003f99;
+    }
+
+    .consent {
       margin-top: 1rem;
       font-size: 0.9rem;
     }
 
-    #result {
+    #loader {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .wcag-label {
+      font-size: 0.8rem;
       margin-top: 2rem;
-      background: #fff;
-      border-left: 4px solid #0052cc;
-      padding: 1rem;
-      max-width: 720px;
-    }
-
-    .label-wcag {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #007700;
+      gap: 0.5rem;
     }
 
-    .label-wcag svg {
-      width: 20px;
-      height: 20px;
-      margin-right: 0.4rem;
+    .wcag-label img {
+      height: 24px;
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live] Datenschutzanalyse & Rewrite inkl. Emojis</h1>
+  <h1>[achtung.live]</h1>
+  <p>Rewrite & Datenschutzcheck inkl. Emojis</p>
 
-  <!-- Sprachwahl -->
-  <label for="language"><strong>🌍 Sprache wählen:</strong></label>
+  <label for="language">Sprache wählen:</label>
   <select id="language">
     <option value="de">🇩🇪 Deutsch</option>
     <option value="en">🇬🇧 English</option>
     <option value="fr">🇫🇷 Français</option>
   </select>
 
-  <!-- Eingabe -->
-  <div>
-    <textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
-  </div>
+  <textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
 
-  <!-- DSGVO-Zustimmung -->
-  <div class="checkbox-block">
-    <input type="checkbox" id="consentCheckbox" />
-    <label for="consentCheckbox">Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
+  <!-- Consent-Checkbox -->
+  <div class="consent">
+    <label><input type="checkbox" id="consentCheckbox" /> Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
   </div>
 
   <!-- Analyse-Button -->
-  <div style="margin-top: 1rem;">
-    <button onclick="startAnalysis()" style="padding: 0.7rem 1.2rem; font-size: 1rem; background-color: #0052cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
-      🧠 Analyse starten
-    </button>
+  <div style="margin-top: 1rem; text-align: left;">
+    <button onclick="startAnalysis()">🧠 Analyse starten</button>
   </div>
-
-  <!-- Ladeanzeige -->
-  <div id="loader" style="margin-top: 1rem; font-weight: bold; color: #555;"></div>
 
   <!-- Ergebnis -->
-  <div id="result"></div>
+  <div id="loader"></div>
+  <div id="result" style="margin-top:2rem;"></div>
 
   <!-- WCAG-Label -->
-  <div class="label-wcag">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="#007700" viewBox="0 0 24 24"><path d="M12 0C5.373.001 0 5.374 0 12.001c0 6.627 5.373 12 12 12s12-5.373 12-12C24 5.374 18.627.001 12 0zm0 22.154c-5.607 0-10.154-4.547-10.154-10.154C1.846 6.392 6.393 1.846 12 1.846s10.154 4.546 10.154 10.154c0 5.607-4.547 10.154-10.154 10.154z"/><path d="M16.005 10.615l-1.003.004a3.97 3.97 0 00-7.993 0l-1.01-.004c-.005.104-.008.208-.008.313 0 .389.038.767.111 1.135l1.046-.201a3.98 3.98 0 001.947 2.292l-.61.977a6.02 6.02 0 003.36.002l-.607-.976a3.978 3.978 0 001.942-2.292l1.048.2c.072-.368.11-.745.11-1.134 0-.104-.003-.209-.007-.313z"/></svg>
-    <span>WCAG-konform geprüft</span>
+  <div class="wcag-label">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/02/WCAG_icon.svg" alt="WCAG-Icon">
+    <span>Barrierefreiheit: WCAG-konform geprüft</span>
   </div>
 
-  <!-- JS-Einbindung -->
+  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>
