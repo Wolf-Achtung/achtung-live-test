@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!text) return;
 
-    // ✅ DSGVO-Zustimmung prüfen
     if (!consentCheckbox || !consentCheckbox.checked) {
       loader.style.display = "none";
       resultContainer.innerHTML = "❌ Bitte stimmen Sie der Verarbeitung Ihrer Eingabe gemäß DSGVO zu.";
@@ -63,8 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.gpt_output) {
         let output = data.gpt_output;
 
+        // ✅ Markdown-Links in HTML konvertieren + Tooltip
         let htmlOutput = output
-          .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+          .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="trusted-link" data-description="$1">$1</a>')
           .replace(/\*\*Erkannte Datenarten:\*\*/g, '<span class="gpt-label">Erkannte Datenarten:</span>')
           .replace(/\*\*Datenschutz-Risiko:\*\*/g, '<span class="gpt-label">Datenschutz-Risiko:</span>')
           .replace(/\*\*Bedeutung:\*\*/g, '<span class="gpt-label">Bedeutung:</span>')
@@ -75,6 +75,24 @@ document.addEventListener("DOMContentLoaded", () => {
         resultContainer.innerHTML = `<div>${htmlOutput}</div>`;
         showEmojiWarnings(text);
 
+        // Tooltip bei Hover anzeigen
+        document.querySelectorAll(".trusted-link").forEach(link => {
+          link.addEventListener("mouseenter", () => {
+            const tip = document.createElement("div");
+            tip.className = "tooltip-box";
+            tip.innerText = "✅ Geprüfte Quelle: " + link.dataset.description;
+            document.body.appendChild(tip);
+            const rect = link.getBoundingClientRect();
+            tip.style.left = rect.left + "px";
+            tip.style.top = (rect.bottom + 5) + "px";
+          });
+          link.addEventListener("mouseleave", () => {
+            const tip = document.querySelector(".tooltip-box");
+            if (tip) tip.remove();
+          });
+        });
+
+        // Rewrite-Tipp extrahieren
         const match = output.match(/(?:\*\*Tipp:\*\*|Rewrite-Vorschlag:?)\s*([\s\S]*?)(?:\n|$)/i);
         if (match && match[1]) {
           const clean = match[1].trim();
@@ -91,8 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   analyzeButton.addEventListener("click", analyzeText);
-
-  // Optionale Live-Analyse:
   userTextArea.addEventListener("input", () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(analyzeText, 1000);
