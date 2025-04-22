@@ -10,7 +10,7 @@ CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# ✅ Whitelist für vertrauenswürdige Quellen
+# 🔐 Whitelist für vertrauenswürdige Quellen
 WHITELIST = [
     "bund.de",
     "datenschutz.org",
@@ -19,7 +19,7 @@ WHITELIST = [
     "netzpolitik.org"
 ]
 
-# 🔍 Link-Prüfung
+# 🔎 Prüft, ob ein Link erreichbar ist
 def is_valid_link(url):
     try:
         allowed = any(domain in url for domain in WHITELIST)
@@ -30,7 +30,7 @@ def is_valid_link(url):
     except:
         return False
 
-# 🧼 Ersetze defekte Links in GPT-Antwort
+# 🧼 Bereinigt GPT-Antwort von toten oder unerwünschten Links
 def sanitize_links(text):
     links = re.findall(r'\[([^\]]+)]\(([^)]+)\)', text)
     for label, url in links:
@@ -44,33 +44,35 @@ def debug_gpt():
     user_input = data.get("text", "")
     user_lang = data.get("lang", "de")
 
-    # 📌 GPT-Prompt mit Emoji-Kontext
+    # 📌 GPT-Prompt: erweitert für Emoji-Kontext & politische Symbolik
     prompt = f"""
-Du bist ein Datenschutz- und Kommunikationsanalyst. Untersuche den folgenden Text auf sensible Inhalte, einschließlich medizinischer, emotionaler, beruflicher oder politischer Natur. Achte auch auf Emojis, die möglicherweise versteckte Bedeutungen tragen, z. B. politische Symbolik (💙, 🐸), psychologische Andeutungen oder Szenecodes.
+Du bist ein KI-System für Datenschutz und digitale Symbolanalyse. Untersuche den folgenden Text auf datenschutzrelevante Inhalte, politische Meinungen, versteckte Symbolik (z. B. Emojis) sowie emotionale oder sensible Aussagen.
 
-Analysiere, ob solche Emojis mit politischen Parteien, Verschwörungstheorien, extremistischen Gruppen oder anderen kritischen Bedeutungen assoziiert werden.
+Achte besonders auf Emojis mit politischem oder gesellschaftlichem Kontext. Beispiel: 💙 wird in deutschen Telegram-Kanälen oft zur Unterstützung der AfD verwendet. Nenne solche Assoziationen explizit und liefere, wenn möglich, eine Quelle.
 
-Antworte strukturiert in folgenden Abschnitten (in Markdown):
+Strukturiere deine Antwort in folgenden Abschnitten (Markdown-Format):
 
 **Erkannte Datenarten:**  
-[Kurze Liste: z. B. Name, politische Meinung, Emoji-Kontext]
+Welche sensiblen oder politisch aufgeladenen Informationen enthält der Text?
 
 **Datenschutz-Risiko:**  
-🟢 / 🟡 / 🔴
+🟢 Unbedenklich / 🟡 Mögliches Risiko / 🔴 Kritisch
 
 **Bedeutung:**  
-Erläutere, warum diese Inhalte kritisch sein könnten – inklusive Emoji-Erklärung, wer diese typischerweise nutzt, und wo sie problematisch wirken können.
+Was bedeutet das Emoji oder die Aussage im Kontext? Welche Gruppen nutzen es?
 
 **achtung.live-Empfehlung:**  
-Was sollte der/die Nutzer:in beachten oder ändern?
+Konkreter Hinweis, was der/die Nutzer:in beachten sollte – auch bei vermeintlich harmlosen Symbolen.
 
 **Tipp:**  
-Konkreter Rewrite-Vorschlag (anonymisierend, datensparsam)
+Rewrite oder konkreter Hinweis, wie der Text sicherer oder neutraler formuliert werden kann.
 
 **Quelle:**  
-Mind. 1 seriöser Link in Markdown – z. B. Campact, Correctiv, Netzpolitik etc.
+Mindestens ein verlässlicher Link zu Hintergrundinformationen, z. B.:
+- https://blog.campact.de/2024/03/geheime-codes-von-rechtsextremen-online-emoji-hashtag/
+- https://correctiv.org/aktuelles/recherche/2022/05/20/emoji-code-rechtsradikale-symbole/
 
-Sprache: {user_lang.upper()}
+Antwortsprache: {user_lang.upper()}
 
 Text zur Analyse:
 \"\"\"{user_input}\"\"\"
@@ -86,15 +88,14 @@ Text zur Analyse:
 
         gpt_output = response.choices[0].message.content.strip()
 
-        # 🪵 Log für Debug-Zwecke
+        # 📋 Logausgabe zur Kontrolle
         print("\n🔍 GPT-Rohantwort:")
         print(gpt_output)
 
-        # 🔗 Linkprüfung
-        checked_output = sanitize_links(gpt_output)
+        cleaned_output = sanitize_links(gpt_output)
 
         return jsonify({
-            "gpt_output": checked_output
+            "gpt_output": cleaned_output
         })
 
     except Exception as e:
