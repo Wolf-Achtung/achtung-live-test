@@ -10,7 +10,7 @@ CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 🟢 Optionale Whitelist sicherer Domains
+# ✅ Optionale Whitelist seriöser Domains
 WHITELIST = ["bund.de", "datenschutz.org", "campact.de", "correctiv.org", "netzpolitik.org"]
 
 def is_valid_link(url):
@@ -24,17 +24,15 @@ def is_valid_link(url):
         return False
 
 def sanitize_links(text):
-    # 🔎 Finde Markdown-Links: [Text](URL)
+    # 🔍 Markdown-Link-Muster: [Label](URL)
     links = re.findall(r'\[([^\]]+)]\(([^)]+)\)', text)
-
     for label, url in links:
         if is_valid_link(url):
             continue
         else:
-            # ⛔️ Ersetze mit Hinweis bei toten oder unerlaubten Links
+            # ⚠️ Ersetze mit Warnhinweis
             replacement = f"❌ {label} – [Link nicht erreichbar oder unsicher]"
             text = text.replace(f"[{label}]({url})", replacement)
-
     return text
 
 @app.route("/debug-gpt", methods=["POST"])
@@ -43,32 +41,21 @@ def debug_gpt():
     user_input = data.get("text", "")
     user_lang = data.get("lang", "de")
 
-    # 💬 GPT PROMPT mit Sprachwahl
+    # 💬 GPT-Prompt mit Sprachwahl
     prompt = f"""
-Du bist ein Datenschutz-Experte mit Fokus auf Textsicherheit und emotional sensible Inhalte. Analysiere den folgenden Text auf datenschutzrechtlich kritische Informationen (z. B. Namen, Symptome, Diagnosen, Meinungen, Emojis, etc.):
+Du bist ein Datenschutz-Coach mit medizinischer, emotionaler und rechtlicher Sensibilität. Analysiere folgenden Text:
 
-Antworte bitte strukturiert mit den folgenden Abschnitten:
+Gib eine strukturierte Rückmeldung mit folgenden Abschnitten:
+**Erkannte Datenarten:**
+**Datenschutz-Risiko:** (🟢/🟡/🔴)
+**Bedeutung:**
+**achtung.live-Empfehlung:**
+**Tipp:** (Rewrite oder Hinweis)
+**Quelle:** (als Markdown-Link)
 
-**Erkannte Datenarten:**  
-[Liste]
+Sprache der Antwort: {user_lang.upper()}
 
-**Datenschutz-Risiko:**  
-🟢 / 🟡 / 🔴 (Ampel nach Sensibilität)
-
-**Bedeutung:**  
-[Kurze Einschätzung, was das Problem ist]
-
-**achtung.live-Empfehlung:**  
-[Hinweis, wie man das Problem vermeiden kann – empathisch formuliert]
-
-**Tipp:**  
-[Rewrite-Vorschlag oder konkreter Hinweis]
-
-**Quelle:**  
-[Füge 1–2 seriöse Quellen per Markdown-Link hinzu]
-
-Sprache: {user_lang.upper()}
-Hier ist der zu prüfende Text:
+Hier ist der Text:
 \"\"\"{user_input}\"\"\"
 """
 
@@ -81,6 +68,11 @@ Hier ist der zu prüfende Text:
         )
 
         gpt_output = response.choices[0].message.content.strip()
+
+        # 🪵 Log in Railway anzeigen
+        print("\n🔍 GPT-Rohantwort:")
+        print(gpt_output)
+
         sanitized_output = sanitize_links(gpt_output)
 
         return jsonify({
@@ -88,6 +80,7 @@ Hier ist der zu prüfende Text:
         })
 
     except Exception as e:
+        print("\n❌ GPT-Fehler:", str(e))
         return jsonify({ "error": str(e) }), 500
 
 if __name__ == "__main__":
