@@ -1,74 +1,68 @@
-const backendURL = "https://web-production-f8648.up.railway.app/debug-gpt";
-const input = document.getElementById("userInput");
-const output = document.getElementById("output");
-const loader = document.getElementById("loader");
-const languageSelector = document.getElementById("language");
-const consentCheckbox = document.getElementById("consentCheckbox");
+const backendUrl = "https://web-production-f8648.up.railway.app/debug-gpt";
 
-input.addEventListener("input", debounce(() => {
-  if (consentCheckbox.checked) {
-    startAnalysis();
-  } else {
-    output.innerHTML = "<span style='color:red;'>Bitte stimmen Sie der Analyse gemäß DSGVO zu.</span>";
-  }
-}, 1200));
+const loader = document.getElementById("loader");
+const resultContainer = document.getElementById("result");
+const textarea = document.getElementById("user-input");
+const consentCheckbox = document.getElementById("consent");
+const languageSelector = document.getElementById("language");
 
 function startAnalysis() {
-  const userInput = input.value.trim();
-  const lang = languageSelector.value;
+  const userText = textarea.value.trim();
+  const language = languageSelector.value;
 
-  if (!userInput) {
-    output.innerHTML = "";
+  if (!consentCheckbox.checked) {
+    alert("Bitte stimmen Sie der Verarbeitung gemäß DSGVO zu.");
     return;
   }
 
-  loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
-  output.innerHTML = "";
+  if (userText === "") {
+    alert("Bitte geben Sie einen Text ein.");
+    return;
+  }
 
-  fetch(backendURL, {
+  loader.style.display = "block";
+  loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
+
+  fetch(backendUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: userInput, lang: lang })
+    body: JSON.stringify({ text: userText, language: language })
   })
-    .then(res => res.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Netzwerkfehler");
+      return response.json();
+    })
     .then(data => {
-      loader.innerText = "";
-      if (data.error) {
-        output.innerHTML = `<span style='color:red;'>❌ Fehler: ${data.error}</span>`;
+      loader.style.display = "none";
+      if (data.gpt_raw) {
+        resultContainer.innerHTML = formatOutput(data.gpt_raw);
       } else {
-        const formatted = formatGPTOutput(data.formatted || data.gpt_raw || "⚠️ Keine Antwort erhalten");
-        output.innerHTML = formatted;
-        applyTooltipsToLinks();
+        resultContainer.innerHTML = "⚠️ Keine Vorschläge gefunden.<br><br><i>GPT-Rohantwort:</i><br>" + (data.error || "Keine Antwort erhalten");
       }
     })
-    .catch(err => {
-      loader.innerText = "";
-      output.innerHTML = `<span style='color:red;'>❌ Fehler: ${err.message}</span>`;
+    .catch(error => {
+      loader.style.display = "none";
+      resultContainer.innerHTML = `❌ Fehler: ${error.message}`;
     });
 }
 
-function formatGPTOutput(text) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong style='color:#b30000;'>$1</strong>")
+function formatOutput(raw) {
+  const withLineBreaks = raw
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #c20000;">$1</strong>') // fette Titel rot
     .replace(/\n{2,}/g, "<br><br>")
     .replace(/\n/g, "<br>")
-    .replace(/(https?:\/\/[^\s]+)/g, (match) => {
-      return `<a href="${match}" target="_blank" class="trusted-link">${match}</a>`;
+    .replace(/(https?:\/\/[^\s]+)/g, match => {
+      return `<a href="${match}" target="_blank" rel="noopener noreferrer">${match}</a>`;
     });
+
+  return `<div class="result-text" style="font-size: 1rem; line-height: 1.6;">${withLineBreaks}</div>`;
 }
 
-function applyTooltipsToLinks() {
-  const links = document.querySelectorAll(".trusted-link");
-  links.forEach(link => {
-    link.classList.add("tooltip");
-    link.setAttribute("title", "Diese Quelle wurde als vertrauenswürdig eingestuft.");
-  });
-}
-
-function debounce(fn, delay) {
-  let timeout;
-  return function () {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, arguments), delay);
-  };
-}
+// Optional: Barrierefreiheit verbessern
+document.addEventListener("DOMContentLoaded", () => {
+  const skipLink = document.createElement("a");
+  skipLink.href = "#maincontent";
+  skipLink.className = "sr-only sr-only-focusable";
+  skipLink.innerText = "Direkt zum Inhalt springen";
+  document.body.prepend(skipLink);
+});

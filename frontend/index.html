@@ -4,105 +4,153 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #fff;
-      color: #1a1a1a;
-      max-width: 700px;
-      margin: 2rem auto;
+      margin: 0;
       padding: 1rem;
+      background-color: #ffffff;
+      color: #1c1c1c;
       line-height: 1.6;
     }
-    h1 {
-      color: #b30000;
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
     }
+
+    header img {
+      height: 50px;
+    }
+
+    #maincontent {
+      max-width: 700px;
+      margin: auto;
+    }
+
     textarea {
       width: 100%;
-      height: 150px;
+      height: 160px;
       font-size: 1rem;
-      padding: 0.75rem;
+      padding: 1rem;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      resize: vertical;
     }
-    #output {
+
+    #result {
       margin-top: 2rem;
       padding: 1rem;
-      border: 1px solid #ddd;
-      background: #fafafa;
-      border-radius: 6px;
-      white-space: normal;
+      background-color: #f9f9f9;
+      border-left: 5px solid #0052cc;
+      font-size: 1rem;
     }
-    #loader {
-      font-style: italic;
+
+    label {
+      display: block;
       margin-top: 1rem;
-      color: #666;
+      margin-bottom: 0.5rem;
     }
-    .trusted-link {
-      color: #0052cc;
-      text-decoration: underline;
-      cursor: help;
+
+    select, input[type="checkbox"] {
+      margin-right: 0.5rem;
     }
+
     .tooltip {
       position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #999;
     }
+
     .tooltip:hover::after {
-      content: attr(title);
+      content: attr(data-tooltip);
       position: absolute;
-      background: #fff0f0;
-      color: #b30000;
-      border: 1px solid #b30000;
-      padding: 5px 8px;
-      border-radius: 4px;
-      top: 100%;
       left: 0;
-      width: max-content;
-      z-index: 10;
-      white-space: nowrap;
+      top: 120%;
+      background: #f0f0f0;
+      color: #333;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 250px;
+      z-index: 100;
     }
-    .consent {
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .wcag-label {
+      display: inline-flex;
+      align-items: center;
+      background-color: #e3f7e1;
+      color: #227722;
+      font-weight: bold;
+      border-radius: 4px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
       margin-top: 1rem;
-      font-size: 0.95rem;
     }
-    select, label {
-      margin-top: 1rem;
-      display: block;
-    }
-    @media (max-width: 600px) {
-      textarea {
-        height: 120px;
-      }
-      body {
-        padding: 1rem;
-      }
+
+    .wcag-label svg {
+      height: 16px;
+      margin-right: 6px;
     }
   </style>
 </head>
+
 <body>
+  <a href="#maincontent" class="sr-only sr-only-focusable">Direkt zum Inhalt</a>
 
-  <h1>[achtung.live]</h1>
-  <p>Automatische Analyse und Korrektur von sensiblen Inhalten – inkl. Emoji-Prüfung, Linkcheck und Rewrite-Vorschlägen.</p>
+  <header>
+    <img src="logo.png" alt="achtung.live Logo" />
+    <div class="wcag-label">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#227722" width="16" height="16">
+        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12c6.6 0 12-5.4 12-12S18.6 0 12 0zm0 21.6c-5.4 0-9.6-4.2-9.6-9.6S6.6 2.4 12 2.4 21.6 6.6 21.6 12 17.4 21.6 12 21.6z"/>
+        <path d="M17.1 9.9l-4.2.6-.3-4.2h-1.2l-.3 4.2-4.2-.6-.3 1.2 4.2.3-.9 4.2h1.2l.9-4.2 4.2-.3z"/>
+      </svg>
+      WCAG-konform geprüft
+    </div>
+  </header>
 
-  <label for="userInput">📝 Geben Sie Ihren Text ein:</label>
-  <textarea id="userInput" placeholder="z. B. Anbei der Befund vom Hausarzt 💊..."></textarea>
+  <main id="maincontent">
+    <label for="user-input">🔍 Geben Sie Ihren Text ein:</label>
+    <textarea id="user-input" placeholder="z.B. 'Ich war bei Dr. Meier wegen Depression. Sertralin wurde verschrieben.'"></textarea>
 
-  <label for="language">🌐 Sprache wählen:</label>
-  <select id="language">
-    <option value="de">🇩🇪 Deutsch</option>
-    <option value="en">🇬🇧 English</option>
-    <option value="fr">🇫🇷 Français</option>
-    <option value="it">🇮🇹 Italiano</option>
-    <option value="es">🇪🇸 Español</option>
-  </select>
+    <label for="language">🌐 Sprache wählen:</label>
+    <select id="language">
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="it">🇮🇹 Italiano</option>
+    </select>
 
-  <label class="consent">
-    <input type="checkbox" id="consentCheckbox" />
-    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
-  </label>
+    <label style="margin-top: 1rem;">
+      <input type="checkbox" id="consent" />
+      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
+    </label>
 
-  <div id="loader"></div>
-  <div id="output"></div>
+    <!-- Analyse-Button -->
+    <div style="margin-top: 1rem; text-align: center;">
+      <button onclick="startAnalysis()" style="padding: 0.7rem 1.2rem; font-size: 1rem; background-color: #0052cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        🧠 Analyse starten
+      </button>
+    </div>
+
+    <div id="loader" style="margin-top: 1rem; font-weight: bold; color: #666;"></div>
+    <div id="result" role="region" aria-live="polite"></div>
+  </main>
+
+  <footer>
+    &copy; 2025 [achtung.live] – DSGVO- und EU AI Act-konform
+  </footer>
 
   <script src="script.js"></script>
 </body>
