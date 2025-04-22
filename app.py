@@ -8,45 +8,41 @@ CORS(app)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔒 Logfile-Konfiguration
-LOG_FILE = "logs/audit_log.jsonl"  # JSONL = eine Zeile pro Logeintrag
+# 🔐 DSGVO-konformes Audit-Log
+LOG_FILE = "logs/audit_log.jsonl"
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
-    lang = data.get("lang", "de")  # Fallback = Deutsch
-
+    lang = data.get("lang", "de")  # fallback
     timestamp = datetime.datetime.utcnow().isoformat()
     session_id = str(uuid.uuid4())
 
-    # 🌍 Sprach-Markierung
+    # 🔤 Sprachpräfix
     language_intro = {
         "de": "Sprache: Deutsch",
         "en": "Language: English",
         "fr": "Langue : Français"
     }.get(lang, "Sprache: Deutsch")
 
-    # 🧠 Mehrsprachiger Prompt mit Emoji-, Risiko- und Rewrite-Analyse
+    # 🎯 Audit-fähiger Prompt mit Rewrite & Emoji-Warnung
     prompt = f"""
-# achtung.live Audit-Prompt (Multilingual + Emojis + Rewrite)
-
+# achtung.live Datenschutzanalyse (v2.3)
 {language_intro}
 
-Bitte analysiere den folgenden Text auf:
-- sensible Gesundheitsdaten, Diagnosen, Medikamente
-- politische Aussagen oder Emojis mit Symbolcharakter
-- doppeldeutige Emojis (z. B. 💙, 🐸, 🧿)
+Bitte analysieren Sie den folgenden Text auf:
+- sensible Inhalte (Diagnosen, Medikamente, Namen, Adressen, Konten, intime Aussagen)
+- politische Aussagen, Symbolik oder Emojis mit potenziell problematischem Hintergrund
 
 Wenn Emojis enthalten sind:
-→ Erkläre ihre Bedeutung in Communitys (AfD, Alt-Right, Queer-Szene etc.)
-→ Gib ein konkretes Beispiel
-→ Gib eine Quelle (z. B. [Campact – Emoji-Codes](https://campact.de/emoji-codes/))
+→ Erklären Sie, ob sie harmlos oder politisch/ideologisch aufgeladen sind (z. B. 💙 = Sympathie, aber auch AfD-Code)
+→ Geben Sie mind. 1 reale Quelle oder journalistische Referenz (z. B. Campact, Belltower.News)
 
-Antworte im folgenden Format:
+Antwortstruktur:
 
 **Erkannte Datenarten:**  
-...
+(Liste der Datenarten)
 
 **Datenschutz-Risiko:**  
 🟢 Unbedenklich  
@@ -54,20 +50,21 @@ Antworte im folgenden Format:
 🔴 Kritisch – nicht versenden!
 
 **Bedeutung:**  
-...
+(Kontext zur Gefahr oder Bedeutung)
 
 **achtung.live-Empfehlung:**  
-...
+(Sicherheits-Tipp für User:innen)
 
 **Tipp:**  
-(Rewrite-Vorschlag für sicheren Ausdruck)
+(Empfohlener Rewrite-Vorschlag – anonymisiert & bedeutungserhaltend)
 
 **Quelle:**  
-[z. B. Campact – Emoji-Codes](https://campact.de/emoji-codes/)
+[Campact – Emoji-Codes](https://www.campact.de/emoji-codes/)  
+[Belltower.News](https://www.belltower.news)
 
 Text zur Analyse:
 \"\"\"{user_input}\"\"\"
-"""
+    """
 
     try:
         response = client.chat.completions.create(
@@ -76,10 +73,9 @@ Text zur Analyse:
             temperature=0.7,
             max_tokens=1000
         )
-
         gpt_output = response.choices[0].message.content.strip()
 
-        # 🔍 Audit-Log-Eintrag vorbereiten
+        # 🔍 JSONL-Log für Transparenz & Kontrolle
         log_entry = {
             "timestamp": timestamp,
             "session_id": session_id,
