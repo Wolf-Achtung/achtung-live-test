@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let emojiData = {};
   let debounceTimer;
 
+  // 🚀 Emoji-Datenbank laden
   fetch("emojiDatabase.json")
     .then((res) => res.json())
     .then((data) => emojiData = data);
@@ -36,13 +37,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedLang = languageSelect.value;
 
     if (!text) return;
+
+    // ✅ DSGVO-Zustimmung prüfen
     if (!consentCheckbox.checked) {
-      resultContainer.innerHTML = "❌ Bitte stimmen Sie der Datenverarbeitung zu.";
+      loader.style.display = "none";
+      resultContainer.innerHTML = "❌ Bitte stimmen Sie der Verarbeitung Ihrer Eingabe zu.";
       return;
     }
 
     resultContainer.innerHTML = "";
     emojiWarningsContainer.innerHTML = "";
+
+    loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
     loader.style.display = "block";
     document.getElementById("rewriteSection").style.display = "none";
 
@@ -57,15 +63,21 @@ document.addEventListener("DOMContentLoaded", () => {
       loader.style.display = "none";
 
       if (data.gpt_output) {
-        const output = data.gpt_output;
+        let output = data.gpt_output;
 
-        // Links im Markdown-Stil zu echten HTML-Links umwandeln
-        const htmlOutput = output.replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // ✅ Formatierungen & klickbare Links
+        let htmlOutput = output
+          .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+          .replace(/\*\*Erkannte Datenarten:\*\*/g, '<span class="gpt-label">Erkannte Datenarten:</span>')
+          .replace(/\*\*Datenschutz-Risiko:\*\*/g, '<span class="gpt-label">Datenschutz-Risiko:</span>')
+          .replace(/\*\*Bedeutung:\*\*/g, '<span class="gpt-label">Bedeutung:</span>')
+          .replace(/\*\*achtung\.live-Empfehlung:\*\*/g, '<span class="gpt-label">achtung.live-Empfehlung:</span>')
+          .replace(/\*\*Tipp:\*\*/g, '<span class="gpt-label">Tipp:</span>')
+          .replace(/\*\*Quelle:\*\*/g, '<span class="gpt-label">Quelle:</span>');
 
         resultContainer.innerHTML = `<div>${htmlOutput}</div>`;
         showEmojiWarnings(text);
 
-        // Rewrite-Vorschlag extrahieren
         const match = output.match(/(?:\*\*Tipp:\*\*|Rewrite-Vorschlag:?)\s*([\s\S]*?)(?:\n|$)/i);
         if (match && match[1]) {
           const clean = match[1].trim();
@@ -81,13 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  analyzeButton.addEventListener("click", analyzeText);
-
+  // 🧠 Auto-Analyse bei Eingabe
   userTextArea.addEventListener("input", () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(analyzeText, 1000);
   });
 
+  // 🌍 Sprachumschaltung
   languageSelect.addEventListener("change", () => {
     const lang = languageSelect.value;
     const intro = document.getElementById("introText");
@@ -104,11 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 📋 Kopierfunktion für Rewrite
+  // 📋 Kopierfunktion
   document.getElementById("copyRewriteBtn").addEventListener("click", () => {
     const rewrite = document.getElementById("rewriteText").innerText;
     navigator.clipboard.writeText(rewrite)
       .then(() => alert("✅ Vorschlag in Zwischenablage kopiert!"))
       .catch(() => alert("❌ Fehler beim Kopieren."));
   });
+
+  analyzeButton.addEventListener("click", analyzeText);
 });
