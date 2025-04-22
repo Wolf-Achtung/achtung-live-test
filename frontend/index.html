@@ -5,126 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
-    :root {
-      --primary: #c60000;
-      --accent: #0a1a2f;
-      --bg: #ffffff;
-      --link: #0044cc;
-      --light: #f9f9f9;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--accent);
-      padding: 20px;
-      margin: auto;
-      max-width: 800px;
+      font-family: system-ui, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+      color: #111;
     }
 
     h1 {
-      font-size: 1.6em;
-      margin-bottom: 1em;
+      color: #1a1a1a;
     }
 
     textarea {
       width: 100%;
-      height: 120px;
-      padding: 12px;
+      min-height: 120px;
       font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      resize: vertical;
+      padding: 10px;
     }
 
     button {
-      background-color: var(--primary);
+      background-color: #cc0000;
       color: white;
-      padding: 14px;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      padding: 12px 20px;
       border: none;
-      border-radius: 8px;
-      margin-top: 20px;
       cursor: pointer;
-      width: 100%;
+      margin-top: 15px;
       touch-action: manipulation;
+      border-radius: 5px;
     }
 
-    label {
-      font-size: 1rem;
-      display: block;
+    button:hover {
+      background-color: #a80000;
+    }
+
+    #output {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-left: 5px solid #cc0000;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #cc0000;
       margin-top: 1em;
     }
 
-    input[type="checkbox"] {
-      transform: scale(1.4);
-      margin-right: 10px;
-    }
-
-    #loader {
+    .language-switch {
       margin-top: 10px;
-      font-weight: bold;
-      color: var(--accent);
     }
 
-    #resultBox {
-      margin-top: 25px;
-      padding: 20px;
-      background: var(--light);
-      border-left: 4px solid var(--primary);
-      border-radius: 5px;
-      line-height: 1.6;
-    }
-
-    #resultBox strong {
-      color: var(--primary);
-    }
-
-    #resultBox a {
-      color: var(--link);
-      text-decoration: underline;
-    }
-
-    .flag-select {
-      display: flex;
-      align-items: center;
-      margin-top: 15px;
-    }
-
-    .flag-select img {
-      width: 28px;
-      height: 20px;
-      margin-right: 10px;
+    .flag-button {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
       cursor: pointer;
-      border: 2px solid transparent;
-      border-radius: 4px;
+      margin-right: 8px;
+      padding: 0;
     }
 
-    .flag-select img.active {
-      border-color: var(--primary);
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 15px;
-      }
-
-      h1 {
-        font-size: 1.4em;
+    @media screen and (max-width: 600px) {
+      textarea {
+        font-size: 1rem;
       }
 
       button {
-        font-size: 1rem;
-        padding: 12px;
+        width: 100%;
       }
 
-      textarea {
-        height: 100px;
-      }
-
-      .flag-select img {
-        width: 26px;
-        height: 18px;
+      .flag-button {
+        font-size: 1.6rem;
       }
     }
   </style>
@@ -132,81 +83,32 @@
 <body>
   <h1>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
 
-  <label for="text">🔎 Zu analysierender Text:</label>
-  <textarea id="text" placeholder="Gib deinen Text hier ein…"></textarea>
+  <label for="inputText">🔎 Zu analysierender Text:</label><br />
+  <textarea id="inputText" placeholder="Gib deinen Text hier ein…"></textarea>
 
-  <div class="flag-select">
-    <img src="https://flagcdn.com/w40/de.png" alt="Deutsch" onclick="setLanguage('de')" id="flag-de" />
-    <img src="https://flagcdn.com/w40/gb.png" alt="English" onclick="setLanguage('en')" id="flag-en" />
-    <img src="https://flagcdn.com/w40/fr.png" alt="Français" onclick="setLanguage('fr')" id="flag-fr" />
+  <div class="language-switch">
+    <button class="flag-button" onclick="setLanguage('de')">🇩🇪</button>
+    <button class="flag-button" onclick="setLanguage('en')">🇬🇧</button>
+    <button class="flag-button" onclick="setLanguage('fr')">🇫🇷</button>
   </div>
 
-  <input type="hidden" id="language" value="de" />
+  <br />
 
   <label>
-    <input type="checkbox" id="consent">
-    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="#">Datenschutzerklärung</a> zu.
+    <input type="checkbox" id="consentCheckbox" checked />
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
+    <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
   </label>
 
-  <p id="loader"></p>
-  <div id="result"></div>
+  <div id="consentWarning" style="color: #cc0000; font-weight: bold; display: none;">
+    ❗ Bitte der Analyse zustimmen.
+  </div>
 
-  <script>
-    let debounceTimer;
+  <br />
+  <button onclick="analyzeText()" id="analyzeBtn">Analyse starten</button>
 
-    function setLanguage(lang) {
-      document.getElementById("language").value = lang;
-      document.querySelectorAll(".flag-select img").forEach(img => img.classList.remove("active"));
-      document.getElementById("flag-" + lang).classList.add("active");
-    }
+  <div id="output"></div>
 
-    function analyzeText() {
-      const text = document.getElementById("text").value.trim();
-      const consent = document.getElementById("consent").checked;
-      const loader = document.getElementById("loader");
-      const result = document.getElementById("result");
-
-      if (!consent) {
-        loader.innerText = "❗ Bitte der Analyse zustimmen.";
-        result.innerHTML = "";
-        return;
-      }
-
-      if (!text) {
-        loader.innerText = "";
-        result.innerHTML = "";
-        return;
-      }
-
-      loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
-      result.innerHTML = "";
-
-      fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: text,
-          language: document.getElementById("language").value
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          loader.innerText = "";
-          if (data.suggestions) {
-            result.innerHTML = "<div id='resultBox'>" + data.suggestions.join("<br><br>") + "</div>";
-          } else {
-            result.innerHTML = "<div id='resultBox'>⚠️ Keine Vorschläge gefunden.<br><br><strong>GPT-Rohantwort:</strong><br>" + (data.gpt_raw || "Keine Antwort erhalten") + "</div>";
-          }
-        })
-        .catch((err) => {
-          loader.innerText = "❌ Fehler: " + err.message;
-        });
-    }
-
-    document.getElementById("text").addEventListener("input", () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(analyzeText, 1200); // Analyse nach 1.2 Sekunden Inaktivität
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
