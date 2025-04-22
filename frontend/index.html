@@ -4,154 +4,104 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
   <style>
     body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background-color: #ffffff;
-      color: #1c1c1c;
+      font-family: "Inter", sans-serif;
+      background-color: #f9f9f9;
+      color: #002244;
+      padding: 2rem;
       line-height: 1.6;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    header img {
-      height: 50px;
-    }
-
-    #maincontent {
-      max-width: 700px;
-      margin: auto;
     }
 
     textarea {
       width: 100%;
-      height: 160px;
+      max-width: 720px;
+      height: 180px;
       font-size: 1rem;
       padding: 1rem;
-      border-radius: 5px;
       border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-family: inherit;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 0.4rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .checkbox-block {
+      margin-top: 1rem;
+      font-size: 0.9rem;
     }
 
     #result {
       margin-top: 2rem;
+      background: #fff;
+      border-left: 4px solid #0052cc;
       padding: 1rem;
-      background-color: #f9f9f9;
-      border-left: 5px solid #0052cc;
-      font-size: 1rem;
+      max-width: 720px;
     }
 
-    label {
-      display: block;
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    select, input[type="checkbox"] {
-      margin-right: 0.5rem;
-    }
-
-    .tooltip {
-      position: relative;
-      cursor: help;
-      border-bottom: 1px dotted #999;
-    }
-
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 0;
-      top: 120%;
-      background: #f0f0f0;
-      color: #333;
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 250px;
-      z-index: 100;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #666;
-    }
-
-    .wcag-label {
+    .label-wcag {
       display: inline-flex;
       align-items: center;
-      background-color: #e3f7e1;
-      color: #227722;
-      font-weight: bold;
-      border-radius: 4px;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.85rem;
       margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #007700;
     }
 
-    .wcag-label svg {
-      height: 16px;
-      margin-right: 6px;
+    .label-wcag svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 0.4rem;
     }
   </style>
 </head>
-
 <body>
-  <a href="#maincontent" class="sr-only sr-only-focusable">Direkt zum Inhalt</a>
+  <h1>[achtung.live] Datenschutzanalyse & Rewrite inkl. Emojis</h1>
 
-  <header>
-    <img src="logo.png" alt="achtung.live Logo" />
-    <div class="wcag-label">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#227722" width="16" height="16">
-        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12c6.6 0 12-5.4 12-12S18.6 0 12 0zm0 21.6c-5.4 0-9.6-4.2-9.6-9.6S6.6 2.4 12 2.4 21.6 6.6 21.6 12 17.4 21.6 12 21.6z"/>
-        <path d="M17.1 9.9l-4.2.6-.3-4.2h-1.2l-.3 4.2-4.2-.6-.3 1.2 4.2.3-.9 4.2h1.2l.9-4.2 4.2-.3z"/>
-      </svg>
-      WCAG-konform geprüft
-    </div>
-  </header>
+  <!-- Sprachwahl -->
+  <label for="language"><strong>🌍 Sprache wählen:</strong></label>
+  <select id="language">
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="fr">🇫🇷 Français</option>
+  </select>
 
-  <main id="maincontent">
-    <label for="user-input">🔍 Geben Sie Ihren Text ein:</label>
-    <textarea id="user-input" placeholder="z.B. 'Ich war bei Dr. Meier wegen Depression. Sertralin wurde verschrieben.'"></textarea>
+  <!-- Eingabe -->
+  <div>
+    <textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
+  </div>
 
-    <label for="language">🌐 Sprache wählen:</label>
-    <select id="language">
-      <option value="de">🇩🇪 Deutsch</option>
-      <option value="en">🇬🇧 English</option>
-      <option value="fr">🇫🇷 Français</option>
-      <option value="es">🇪🇸 Español</option>
-      <option value="it">🇮🇹 Italiano</option>
-    </select>
+  <!-- DSGVO-Zustimmung -->
+  <div class="checkbox-block">
+    <input type="checkbox" id="consentCheckbox" />
+    <label for="consentCheckbox">Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
+  </div>
 
-    <label style="margin-top: 1rem;">
-      <input type="checkbox" id="consent" />
-      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
-    </label>
+  <!-- Analyse-Button -->
+  <div style="margin-top: 1rem;">
+    <button onclick="startAnalysis()" style="padding: 0.7rem 1.2rem; font-size: 1rem; background-color: #0052cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      🧠 Analyse starten
+    </button>
+  </div>
 
-    <!-- Analyse-Button -->
-    <div style="margin-top: 1rem; text-align: center;">
-      <button onclick="startAnalysis()" style="padding: 0.7rem 1.2rem; font-size: 1rem; background-color: #0052cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        🧠 Analyse starten
-      </button>
-    </div>
+  <!-- Ladeanzeige -->
+  <div id="loader" style="margin-top: 1rem; font-weight: bold; color: #555;"></div>
 
-    <div id="loader" style="margin-top: 1rem; font-weight: bold; color: #666;"></div>
-    <div id="result" role="region" aria-live="polite"></div>
-  </main>
+  <!-- Ergebnis -->
+  <div id="result"></div>
 
-  <footer>
-    &copy; 2025 [achtung.live] – DSGVO- und EU AI Act-konform
-  </footer>
+  <!-- WCAG-Label -->
+  <div class="label-wcag">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="#007700" viewBox="0 0 24 24"><path d="M12 0C5.373.001 0 5.374 0 12.001c0 6.627 5.373 12 12 12s12-5.373 12-12C24 5.374 18.627.001 12 0zm0 22.154c-5.607 0-10.154-4.547-10.154-10.154C1.846 6.392 6.393 1.846 12 1.846s10.154 4.546 10.154 10.154c0 5.607-4.547 10.154-10.154 10.154z"/><path d="M16.005 10.615l-1.003.004a3.97 3.97 0 00-7.993 0l-1.01-.004c-.005.104-.008.208-.008.313 0 .389.038.767.111 1.135l1.046-.201a3.98 3.98 0 001.947 2.292l-.61.977a6.02 6.02 0 003.36.002l-.607-.976a3.978 3.978 0 001.942-2.292l1.048.2c.072-.368.11-.745.11-1.134 0-.104-.003-.209-.007-.313z"/></svg>
+    <span>WCAG-konform geprüft</span>
+  </div>
 
+  <!-- JS-Einbindung -->
   <script src="script.js"></script>
 </body>
 </html>
