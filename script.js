@@ -4,51 +4,53 @@ document.addEventListener("DOMContentLoaded", function () {
   const loader = document.getElementById("loader");
   const emojiWarningsContainer = document.getElementById("emojiWarnings");
 
-  // Emoji-Datenbank für Warnhinweise
-  const emojiMap = {
-    "💙": {
-      title: "Blaues Herz 💙",
-      text: "Kann als Symbol für rechtspopulistische Gruppen wie die Identitäre Bewegung oder AfD verwendet werden. Auch bei Ukraine-Solidarität gebräuchlich – Kontext entscheidet.",
-      link: "https://www.campact.de/emoji-codes/"
-    },
-    "🐸": {
-      title: "Frosch-Emoji 🐸",
-      text: "Oft Symbol der Alt-Right-Bewegung ('Pepe the Frog'), verwendet in rechtsextremen Memes.",
-      link: "https://www.adl.org/resources/hate-symbol/pepe-the-frog"
-    },
-    "🔫": {
-      title: "Pistole 🔫",
-      text: "Kann auf Gewalt, Bedrohung oder toxische Subkulturen hinweisen.",
-      link: "https://www.bpb.de"
-    },
-    "🧿": {
-      title: "Nazar-Auge 🧿",
-      text: "Im religiösen oder spirituellen Kontext verbreitet. In Verschwörungsszenen teils als okkultes Zeichen fehlgedeutet.",
-      link: "https://de.wikipedia.org/wiki/Nazar_(Amulett)"
-    },
-    "☠️": {
-      title: "Totenkopf ☠️",
-      text: "Kann als Symbol von Gewalt oder in subkulturellen Codes wie Darknet-Chats erscheinen.",
-      link: "https://www.bpb.de"
-    }
-    // Weitere Emojis ergänzbar
-  };
+  let emojiData = {};
+
+  fetch("emojiDatabase.json")
+    .then(response => response.json())
+    .then(data => {
+      emojiData = data;
+    });
 
   function showEmojiWarnings(text) {
-    let warnings = "";
-    Object.keys(emojiMap).forEach((emoji) => {
+    emojiWarningsContainer.innerHTML = "";
+    Object.keys(emojiData).forEach((emoji) => {
       if (text.includes(emoji)) {
-        const info = emojiMap[emoji];
-        warnings += `
-          <div style="background:#fff3cd; border-left:4px solid #ffc107; padding:12px; margin:12px 0; border-radius:4px;">
-            <strong>${info.title}</strong><br>
-            ${info.text}<br>
-            <a href="${info.link}" target="_blank">Mehr erfahren</a>
-          </div>
-        `;
+        const info = emojiData[emoji];
+
+        const box = document.createElement("div");
+        const label = document.createElement("strong");
+        const textEl = document.createElement("p");
+        const link = document.createElement("a");
+        const tooltip = document.createElement("span");
+
+        box.appendChild(label);
+        box.appendChild(textEl);
+        box.appendChild(link);
+        box.appendChild(tooltip);
+
+        label.textContent = info.title;
+        textEl.textContent = info.text;
+        link.href = info.link;
+        link.textContent = "Mehr erfahren";
+        link.target = "_blank";
+
+        tooltip.textContent = "ⓘ";
+        tooltip.title = info.text;
+
+        box.appendChild(label);
+        emojiWarningsContainer.appendChild(box);
+
+        Object.assign(box.style, {
+          background: "#fff3cd",
+          borderLeft: "4px solid #ffc107",
+          padding: "12px",
+          margin: "12px 0",
+          borderRadius: "4px",
+          position: "relative"
+        });
       }
     });
-    emojiWarningsContainer.innerHTML = warnings;
   }
 
   analyzeButton.addEventListener("click", async () => {
@@ -84,8 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     } catch (error) {
       loader.style.display = "none";
-      console.error("Fehler beim Abrufen:", error);
-      resultContainer.innerHTML = `❌ Fehler beim Verbinden mit dem Server.<br>${error.message}`;
+      resultContainer.innerHTML = `❌ Fehler: ${error.message}`;
     }
   });
 });
