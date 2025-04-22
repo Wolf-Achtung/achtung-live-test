@@ -1,128 +1,56 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const analyzeButton = document.getElementById("analyzeButton");
-  const userTextArea = document.getElementById("userText");
-  const resultContainer = document.getElementById("result");
-  const emojiWarningsContainer = document.getElementById("emojiWarnings");
+const backendUrl = "https://web-production-f8648.up.railway.app/analyze"; // deine Backend-Route
+
+async function startAnalysis() {
+  const text = document.getElementById("userInput").value.trim();
+  const consent = document.getElementById("consentCheckbox").checked;
+  const lang = document.getElementById("language").value;
   const loader = document.getElementById("loader");
-  const consentCheckbox = document.getElementById("consentCheckbox");
-  const languageSelect = document.getElementById("languageSelect");
+  const output = document.getElementById("output");
 
-  let emojiData = {};
-  let debounceTimer;
-
-  // 🚀 Emoji-Datenbank laden
-  fetch("emojiDatabase.json")
-    .then((res) => res.json())
-    .then((data) => emojiData = data);
-
-  function showEmojiWarnings(text) {
-    emojiWarningsContainer.innerHTML = "";
-    Object.keys(emojiData).forEach((emoji) => {
-      if (text.includes(emoji)) {
-        const info = emojiData[emoji];
-        const box = document.createElement("div");
-        box.innerHTML = `
-          <strong>${info.title}</strong><br>
-          ${info.text}<br>
-          <em>Szenenzuordnung: ${info.group}</em><br>
-          <a href="${info.link}" target="_blank">🔗 Quelle</a>
-        `;
-        emojiWarningsContainer.appendChild(box);
-      }
-    });
+  if (!consent) {
+    output.innerHTML = "⚠️ Bitte stimmen Sie der Datenschutzerklärung zu, um fortzufahren.";
+    return;
   }
 
-  async function analyzeText() {
-    const text = userTextArea.value.trim();
-    const selectedLang = languageSelect.value;
+  if (!text) {
+    output.innerHTML = "⚠️ Bitte geben Sie einen Text ein.";
+    return;
+  }
 
-    if (!text) return;
+  loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
+  output.innerHTML = "";
 
-    // ✅ DSGVO-Zustimmung prüfen
-    if (!consentCheckbox.checked) {
-      loader.style.display = "none";
-      resultContainer.innerHTML = "❌ Bitte stimmen Sie der Verarbeitung Ihrer Eingabe zu.";
+  try {
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text, language: lang })
+    });
+
+    const result = await response.json();
+    if (result.error) {
+      output.innerHTML = `❌ Fehler: ${result.error}`;
+      loader.innerText = "";
       return;
     }
 
-    resultContainer.innerHTML = "";
-    emojiWarningsContainer.innerHTML = "";
+    let formatted = result.output || result.gpt_raw || "⚠️ Keine Rückmeldung vom System.";
 
-    loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
-    loader.style.display = "block";
-    document.getElementById("rewriteSection").style.display = "none";
+    // Ersetze Linkformate wie [Text](URL) mit echten anklickbaren HTML-Links
+    formatted = formatted.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, (match, text, url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="trusted-link tooltip" title="Geprüfte Quelle">${text}</a>`;
+    });
 
-    try {
-      const response = await fetch("https://web-production-f8648.up.railway.app/debug-gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, lang: selectedLang })
-      });
+    // Fettformatierung beibehalten
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong style='color:#b30000;'>$1</strong>");
 
-      const data = await response.json();
-      loader.style.display = "none";
+    // Zeilenumbrüche erhalten
+    formatted = formatted.replace(/\n/g, "<br>");
 
-      if (data.gpt_output) {
-        let output = data.gpt_output;
-
-        // ✅ Formatierungen & klickbare Links
-        let htmlOutput = output
-          .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-          .replace(/\*\*Erkannte Datenarten:\*\*/g, '<span class="gpt-label">Erkannte Datenarten:</span>')
-          .replace(/\*\*Datenschutz-Risiko:\*\*/g, '<span class="gpt-label">Datenschutz-Risiko:</span>')
-          .replace(/\*\*Bedeutung:\*\*/g, '<span class="gpt-label">Bedeutung:</span>')
-          .replace(/\*\*achtung\.live-Empfehlung:\*\*/g, '<span class="gpt-label">achtung.live-Empfehlung:</span>')
-          .replace(/\*\*Tipp:\*\*/g, '<span class="gpt-label">Tipp:</span>')
-          .replace(/\*\*Quelle:\*\*/g, '<span class="gpt-label">Quelle:</span>');
-
-        resultContainer.innerHTML = `<div>${htmlOutput}</div>`;
-        showEmojiWarnings(text);
-
-        const match = output.match(/(?:\*\*Tipp:\*\*|Rewrite-Vorschlag:?)\s*([\s\S]*?)(?:\n|$)/i);
-        if (match && match[1]) {
-          const clean = match[1].trim();
-          document.getElementById("rewriteText").innerText = clean;
-          document.getElementById("rewriteSection").style.display = "block";
-        }
-      } else {
-        resultContainer.innerHTML = "⚠️ Keine Vorschläge gefunden.";
-      }
-    } catch (err) {
-      loader.style.display = "none";
-      resultContainer.innerHTML = `❌ Fehler: ${err.message}`;
-    }
+    output.innerHTML = formatted;
+  } catch (error) {
+    output.innerHTML = `❌ Fehler: ${error.message}`;
+  } finally {
+    loader.innerText = "";
   }
-
-  // 🧠 Auto-Analyse bei Eingabe
-  userTextArea.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(analyzeText, 1000);
-  });
-
-  // 🌍 Sprachumschaltung
-  languageSelect.addEventListener("change", () => {
-    const lang = languageSelect.value;
-    const intro = document.getElementById("introText");
-
-    if (lang === "en") {
-      intro.textContent = "Data protection analysis and rewriting (incl. emojis)";
-      analyzeButton.textContent = "Start analysis";
-    } else if (lang === "fr") {
-      intro.textContent = "Analyse de confidentialité et réécriture (avec emojis)";
-      analyzeButton.textContent = "Lancer l'analyse";
-    } else {
-      intro.textContent = "Datenschutzanalyse und Korrektur (inkl. Emojis)";
-      analyzeButton.textContent = "Analyse starten";
-    }
-  });
-
-  // 📋 Kopierfunktion
-  document.getElementById("copyRewriteBtn").addEventListener("click", () => {
-    const rewrite = document.getElementById("rewriteText").innerText;
-    navigator.clipboard.writeText(rewrite)
-      .then(() => alert("✅ Vorschlag in Zwischenablage kopiert!"))
-      .catch(() => alert("❌ Fehler beim Kopieren."));
-  });
-
-  analyzeButton.addEventListener("click", analyzeText);
-});
+}
