@@ -1,97 +1,94 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os, json, uuid, datetime
-from openai import OpenAI
+import os
+import openai
+import re
+import requests
 
 app = Flask(__name__)
 CORS(app)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 🔐 DSGVO-konformes Audit-Log
-LOG_FILE = "logs/audit_log.jsonl"
+# 🟢 Optionale Whitelist sicherer Domains
+WHITELIST = ["bund.de", "datenschutz.org", "campact.de", "correctiv.org", "netzpolitik.org"]
+
+def is_valid_link(url):
+    try:
+        domain_allowed = any(domain in url for domain in WHITELIST)
+        if not domain_allowed:
+            return False
+        response = requests.head(url, timeout=5)
+        return response.status_code == 200
+    except:
+        return False
+
+def sanitize_links(text):
+    # 🔎 Finde Markdown-Links: [Text](URL)
+    links = re.findall(r'\[([^\]]+)]\(([^)]+)\)', text)
+
+    for label, url in links:
+        if is_valid_link(url):
+            continue
+        else:
+            # ⛔️ Ersetze mit Hinweis bei toten oder unerlaubten Links
+            replacement = f"❌ {label} – [Link nicht erreichbar oder unsicher]"
+            text = text.replace(f"[{label}]({url})", replacement)
+
+    return text
 
 @app.route("/debug-gpt", methods=["POST"])
 def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
-    lang = data.get("lang", "de")  # fallback
-    timestamp = datetime.datetime.utcnow().isoformat()
-    session_id = str(uuid.uuid4())
+    user_lang = data.get("lang", "de")
 
-    # 🔤 Sprachpräfix
-    language_intro = {
-        "de": "Sprache: Deutsch",
-        "en": "Language: English",
-        "fr": "Langue : Français"
-    }.get(lang, "Sprache: Deutsch")
-
-    # 🎯 Audit-fähiger Prompt mit Rewrite & Emoji-Warnung
+    # 💬 GPT PROMPT mit Sprachwahl
     prompt = f"""
-# achtung.live Datenschutzanalyse (v2.3)
-{language_intro}
+Du bist ein Datenschutz-Experte mit Fokus auf Textsicherheit und emotional sensible Inhalte. Analysiere den folgenden Text auf datenschutzrechtlich kritische Informationen (z. B. Namen, Symptome, Diagnosen, Meinungen, Emojis, etc.):
 
-Bitte analysieren Sie den folgenden Text auf:
-- sensible Inhalte (Diagnosen, Medikamente, Namen, Adressen, Konten, intime Aussagen)
-- politische Aussagen, Symbolik oder Emojis mit potenziell problematischem Hintergrund
-
-Wenn Emojis enthalten sind:
-→ Erklären Sie, ob sie harmlos oder politisch/ideologisch aufgeladen sind (z. B. 💙 = Sympathie, aber auch AfD-Code)
-→ Geben Sie mind. 1 reale Quelle oder journalistische Referenz (z. B. Campact, Belltower.News)
-
-Antwortstruktur:
+Antworte bitte strukturiert mit den folgenden Abschnitten:
 
 **Erkannte Datenarten:**  
-(Liste der Datenarten)
+[Liste]
 
 **Datenschutz-Risiko:**  
-🟢 Unbedenklich  
-🟡 Mögliches Risiko  
-🔴 Kritisch – nicht versenden!
+🟢 / 🟡 / 🔴 (Ampel nach Sensibilität)
 
 **Bedeutung:**  
-(Kontext zur Gefahr oder Bedeutung)
+[Kurze Einschätzung, was das Problem ist]
 
 **achtung.live-Empfehlung:**  
-(Sicherheits-Tipp für User:innen)
+[Hinweis, wie man das Problem vermeiden kann – empathisch formuliert]
 
 **Tipp:**  
-(Empfohlener Rewrite-Vorschlag – anonymisiert & bedeutungserhaltend)
+[Rewrite-Vorschlag oder konkreter Hinweis]
 
 **Quelle:**  
-[Campact – Emoji-Codes](https://www.campact.de/emoji-codes/)  
-[Belltower.News](https://www.belltower.news)
+[Füge 1–2 seriöse Quellen per Markdown-Link hinzu]
 
-Text zur Analyse:
+Sprache: {user_lang.upper()}
+Hier ist der zu prüfende Text:
 \"\"\"{user_input}\"\"\"
-    """
+"""
 
     try:
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{ "role": "user", "content": prompt }],
             temperature=0.7,
-            max_tokens=1000
+            max_tokens=1000,
         )
+
         gpt_output = response.choices[0].message.content.strip()
+        sanitized_output = sanitize_links(gpt_output)
 
-        # 🔍 JSONL-Log für Transparenz & Kontrolle
-        log_entry = {
-            "timestamp": timestamp,
-            "session_id": session_id,
-            "language": lang,
-            "input": user_input,
-            "gpt_output": gpt_output
-        }
-
-        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-        with open(LOG_FILE, "a", encoding="utf-8") as logfile:
-            logfile.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
-
-        return jsonify({ "gpt_output": gpt_output })
+        return jsonify({
+            "gpt_output": sanitized_output
+        })
 
     except Exception as e:
-        return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" }), 500
+        return jsonify({ "error": str(e) }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
