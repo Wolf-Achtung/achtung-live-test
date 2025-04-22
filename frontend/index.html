@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Rewrite & Datenschutzcheck inkl. Emojis</title>
+  <title>Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -55,7 +55,7 @@
 </head>
 <body>
   <h1>[achtung.live]</h1>
-  <p id="introText">Rewrite- & Emoji-Datenschutzanalyse</p>
+  <p id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</p>
 
   <label for="languageSelect">🌐 Sprache wählen:</label>
   <select id="languageSelect">
@@ -77,8 +77,14 @@
   <div id="result"></div>
   <div id="emojiWarnings"></div>
 
+  <div id="rewriteSection" style="display: none; margin-top: 30px;">
+    <h3>📋 Rewrite-Vorschlag:</h3>
+    <div id="rewriteText" style="background: #eef; padding: 12px; border-radius: 6px; margin-bottom: 8px;"></div>
+    <button id="copyRewriteBtn">✅ Vorschlag kopieren</button>
+  </div>
+
   <footer>
-    ℹ️ Diese Seite verwendet GPT-basierte KI zur Textanalyse gemäß <strong>EU AI Act</strong>. Ihre Eingabe wird anonymisiert verarbeitet. Mehr erfahren: 
+    ℹ️ Diese Seite verwendet GPT-basierte KI zur Textanalyse gemäß <strong>EU AI Act</strong>. Ihre Eingabe wird anonymisiert verarbeitet. Mehr Informationen: 
     <a href="https://digital-strategy.ec.europa.eu/en/policies/european-ai-act" target="_blank">EU AI Act</a>
   </footer>
 
