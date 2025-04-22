@@ -6,7 +6,6 @@ import openai
 app = Flask(__name__)
 CORS(app)
 
-# Neue OpenAI-Client-Struktur ab openai>=1.0.0
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/debug-gpt", methods=["POST"])
@@ -14,39 +13,42 @@ def debug_gpt():
     data = request.get_json()
     user_input = data.get("text", "")
 
-    prompt = f"""
-Sie sind ein auf Datenschutz spezialisierter Textanalyst. Ihre Aufgabe ist es, den folgenden Text zu analysieren und sensibel zu bewerten:
+    prompt = f'''
+🔐 Du bist ein vertrauensvoller KI-Datenschutz-Coach mit Schwerpunkt auf sensiblen Informationen, emotionalen Aussagen und symbolischer Sprache.
 
-1. Welche Arten vertraulicher Daten enthält der Text?
-2. Wie hoch ist das Datenschutzrisiko? (Ampel-Kennzeichnung)
-3. Warum ist der Inhalt unter Datenschutzaspekten sensibel?
-4. Formulieren Sie einen konkreten, praktischen Tipp für die betroffene Person (z. B. wie man Inhalte anonymisieren oder sicher verschicken kann). Der Hinweis soll klar, leicht verständlich und direkt anwendbar sein.
-5. Bieten Sie **einen Rewrite-Vorschlag** an – aber nur, wenn Sie diesen für sinnvoll und hilfreich erachten.
-6. Verwenden Sie ausschließlich Sie-Form, verzichten Sie auf Icons außer der Datenschutz-Ampel.
-7. Betonen Sie vulnerable Gruppen wie Kinder, ältere Menschen, Menschen mit psychischen Belastungen und Personen mit Sprachbarrieren besonders vorsichtig.
-
-Struktur der Ausgabe:
+📌 Bitte analysiere den folgenden Text besonders auf:
+- Gesundheitsdaten (Diagnosen, Medikamente, Symptome)
+- Namen von Personen (z. B. Ärzte, Angehörige)
+- Emotionale und psychische Inhalte
+- persönliche Identifizierbarkeit (Adresse, Telefonnummer, Arbeitgeber etc.)
+- Zugangsdaten, IBAN, Passwörter, Kreditkarten
+- problematische Emojis wie 💙, 🐸, 🔫, 🧿, ☠️, 🔞, 🏴‍☠️ usw.
+- Kombinationen, die zu Datenschutzrisiken oder Missverständnissen führen
 
 ---
-**Erkannte Datenarten:**  
-[List der sensiblen Inhalte]
 
-**Datenschutz-Risiko:** 🟢 / 🟡 / 🔴
+📋 Antworte IMMER in dieser Struktur:
+
+**Erkannte Datenarten:**  
+- [Liste der sensiblen Inhalte oder Emojis]
+
+**Datenschutz-Risiko:**  
+🟢 Unbedenklich / 🟡 Mögliches Risiko / 🔴 Kritisch – so nicht senden!
 
 **Bedeutung:**  
-[Warum ist dieser Inhalt kritisch?]
+[Erkläre, warum bestimmte Kombinationen problematisch sind – z. B. Name + Medikament + 💙]
 
 **achtung.live-Empfehlung:**  
-Formulieren Sie praktische Hinweise und nutzen Sie, wenn möglich, sichere Informationsquellen als HTML-Link:  
-`<a href='https://www.bund.de/DE/...'>Datenschutz im Internet</a>`
+[Gib praktische Hinweise, wie Nutzer:innen Texte datenschutzsicher gestalten können – gerne mit HTML-Link, z. B.: <a href="https://www.datenschutz.org/datensicherheit/" target="_blank">Datensicherheit im Netz</a>]
 
-**Optionaler Vorschlag zur Umformulierung:**  
-[Nur wenn wirklich hilfreich – eine sichere, datenschutzsensible, empathische Version des Originaltexts.]
+**Tipp:**  
+[Ein einfacher, technischer Tipp für Laien, z. B. „So verschlüsseln Sie eine ZIP-Datei: <a href='https://www.bsi.bund.de/DE/Themen/Verbraucherinnen-und-Verbraucher/Downloads/zip-passwortschutz.html' target='_blank'>Zur Anleitung</a>“]
 
 ---
-Hier ist der zu prüfende Text:  
+
+Hier ist der zu prüfende Text:
 \"\"\"{user_input}\"\"\"
-    """
+'''
 
     try:
         response = client.chat.completions.create(
@@ -56,12 +58,9 @@ Hier ist der zu prüfende Text:
             max_tokens=1000
         )
         gpt_output = response.choices[0].message.content.strip()
-        print("✅ GPT-Antwort:", gpt_output)
         return jsonify({ "gpt_output": gpt_output })
-
     except Exception as e:
-        print("❌ GPT-Fehler:", str(e))
-        return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" })
+        return jsonify({ "gpt_output": f"❌ GPT-Fehler:\n\n{str(e)}" }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
