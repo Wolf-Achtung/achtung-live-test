@@ -1,108 +1,99 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from openai import OpenAI
 import os
 import json
 import re
 import requests
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from openai import OpenAI
 
-# Initialisierung
 app = Flask(__name__)
 CORS(app)
 
-# OpenAI-Key aus Umgebungsvariablen
+# GPT-Client (ab openai>=1.0.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Vertrauenswürdige Links laden (optional)
-trusted_links = []
+# Vertrauenswürdige Quellen aus JSON-Datei laden
 try:
     with open("trusted_links.json", "r") as f:
         trusted_links = json.load(f)
     print(f"✅ {len(trusted_links)} vertrauenswürdige Links geladen.")
 except Exception as e:
     print(f"⚠️ trusted_links.json konnte nicht geladen werden: {e}")
+    trusted_links = []
 
-# Funktion: GPT-Prompt mit Sprachoption
-def build_prompt(text, language):
-    intro = {
-        "de": "Du bist ein Datenschutz-Coach mit Schwerpunkt auf DSGVO, medizinische, berufliche, emotionale und behördliche Inhalte.",
-        "en": "You are a data protection coach specializing in GDPR, medical, professional, emotional, and official content.",
-        "fr": "Vous êtes un coach en protection des données spécialisé dans le RGPD, les contenus médicaux, professionnels, émotionnels et administratifs."
-    }
+# Linkscanner prüft, ob ein Link gültig ist (Statuscode 200)
+def check_link_status(url):
+    try:
+        response = requests.head(url, timeout=3)
+        return response.status_code == 200
+    except Exception:
+        return False
 
-    rewrite_info = {
-        "de": "Wenn sensible Inhalte erkannt werden, beschreibe sie kurz und gib einen Rewrite-Vorschlag.",
-        "en": "If sensitive content is found, describe it briefly and offer a rewrite suggestion.",
-        "fr": "Si du contenu sensible est détecté, décris-le brièvement et propose une reformulation."
-    }
-
-    return f"""{intro.get(language, intro['de'])}
-Analysiere den folgenden Text auf:
-- Persönliche & medizinische Informationen
-- Emojis mit möglicher Symbolik
-- Vertrauliche Daten (z. B. Berufliches, Finanzen)
-- Politisch oder emotional aufgeladene Aussagen
-- Links oder Webseiten (auf Vertrauenswürdigkeit prüfen)
-
-{rewrite_info.get(language, rewrite_info['de'])}
-
-Text:
-\"\"\"{text}\"\"\"
-"""
-
-# Funktion: Linkscanner (prüft HTTP-Status)
-def extract_links(text):
-    return re.findall(r'https?://\S+', text)
-
-def validate_links(links):
-    validated = []
-    for url in links:
-        try:
-            resp = requests.head(url, timeout=5, allow_redirects=True)
-            if resp.status_code == 200:
-                validated.append({"url": url, "status": "ok"})
-            else:
-                validated.append({"url": url, "status": f"fehlerhaft ({resp.status_code})"})
-        except Exception:
-            validated.append({"url": url, "status": "nicht erreichbar"})
-    return validated
-
-# API-Endpunkt
 @app.route("/analyze", methods=["POST"])
 def analyze():
+    data = request.get_json()
+    user_text = data.get("text", "")
+    language = data.get("language", "de")
+
+    prompt = f"""
+Du bist ein KI-gestützter Datenschutz-Coach für die Plattform achtung.live. Prüfe den folgenden Text auf datenschutzsensible Inhalte, politische oder medizinische Aussagen, Emoji-Bedeutung, Links oder potenzielle Risiken.
+
+Beurteile und antworte im folgenden strukturierten Format in der gewählten Sprache ({language}):
+
+**Erkannte Datenarten:**  
+[Auflistung]
+
+**Datenschutz-Risiko:**  
+🟢 Unbedenklich  
+🟡 Achtung! Mögliches Risiko  
+🔴 Kritisch – so nicht senden!
+
+**Bedeutung der gefundenen Elemente:**  
+[Kontextbeschreibung inkl. Emoji- oder Linkdeutung]
+
+**achtung.live-Empfehlung:**  
+[Empathische, datenschutzfreundliche Empfehlung]
+
+**Tipp:**  
+[Konkreter Rewrite oder Sicherheitshinweis – gerne mit Quelle]
+
+**Quelle:**  
+[Seriöse Quelle mit Link – z. B. Campact, netzpolitik.org, BSI, etc.]
+
+Hier ist der zu analysierende Text:
+\"\"\"{user_text}\"\"\"
+    """
+
     try:
-        data = request.get_json()
-        user_text = data.get("text", "")
-        lang = data.get("language", "de")
-
-        if not user_text.strip():
-            return jsonify({"error": "Text ist leer."}), 400
-
-        prompt = build_prompt(user_text, lang)
-
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Du bist ein Datenschutz-Experte."},
+                {"role": "system", "content": "Du bist ein verantwortungsvoller Datenschutz-Coach."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=800
+            temperature=0.6,
+            max_tokens=1000
         )
-
         gpt_output = response.choices[0].message.content.strip()
-        found_links = extract_links(gpt_output)
-        validated_links = validate_links(found_links)
+
+        # Verlinkte URLs extrahieren und auf Gültigkeit prüfen
+        urls = re.findall(r'https?://[^\s\)]+', gpt_output)
+        verified_output = gpt_output
+
+        for url in urls:
+            if url not in trusted_links or not check_link_status(url):
+                verified_output = verified_output.replace(url, f"[⚠️ Link nicht verfügbar oder unsicher]")
 
         return jsonify({
-            "output": gpt_output,
-            "validated_links": validated_links
+            "gpt_raw": verified_output,
+            "status": "success"
         })
 
     except Exception as e:
-        print("❌ GPT-Fehler:", e)
-        return jsonify({ "error": str(e) }), 500
+        return jsonify({
+            "error": str(e),
+            "status": "failed"
+        }), 500
 
-# Startpunkt
 if __name__ == "__main__":
     app.run(debug=True)
