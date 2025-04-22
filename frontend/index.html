@@ -5,20 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>[achtung.live] Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 2em; }
-    #loader { font-style: italic; color: #555; margin-top: 1em; display: none; }
-    .gpt-label { color: #cc0000; font-weight: bold; display: block; margin-top: 1em; }
-    #rewriteSection { display: none; margin-top: 1em; background: #f3f3f3; padding: 1em; border-left: 4px solid #cc0000; }
-    #emojiWarnings div { margin: 0.5em 0; padding: 0.5em; background: #fffbe6; border: 1px solid #e6cf00; }
+    body {
+      font-family: Inter, sans-serif;
+      padding: 2em;
+      background: #ffffff;
+      color: #001b44;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #001b44;
+    }
+    #logo {
+      width: 220px;
+      margin-bottom: 1em;
+    }
+    #loader {
+      font-style: italic;
+      color: #555;
+      margin-top: 1em;
+      display: none;
+    }
+    .gpt-label {
+      color: #cc0000;
+      font-weight: bold;
+      display: block;
+      margin-top: 1em;
+    }
+    #rewriteSection {
+      display: none;
+      margin-top: 2em;
+      background: #f9f9f9;
+      padding: 1em;
+      border-left: 4px solid #cc0000;
+      border-radius: 4px;
+    }
+    #emojiWarnings div {
+      margin: 0.5em 0;
+      padding: 0.5em;
+      background: #fffbe6;
+      border: 1px solid #e6cf00;
+      border-radius: 3px;
+    }
+    textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.5em;
+    }
+    button {
+      background: #cc0000;
+      color: white;
+      padding: 0.6em 1.2em;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+    button:hover {
+      background: #990000;
+    }
+    a {
+      color: #001b44;
+      text-decoration: underline;
+    }
+    select {
+      padding: 0.3em;
+      font-size: 1em;
+    }
+    label {
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 🔺 LOGO -->
+  <img src="logo.png" alt="[achtung.live]" id="logo" />
 
   <h1 id="introText">Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
 
   <label for="userText">🔎 Zu analysierender Text:</label><br>
   <textarea id="userText" rows="6" style="width:100%; margin-top:0.5em;"></textarea><br><br>
 
+  <!-- 🌐 Sprache -->
   <select id="languageSelect">
     <option value="de">Deutsch</option>
     <option value="en">English</option>
@@ -26,17 +94,23 @@
   </select>
 
   <br><br>
+  <!-- ✅ DSGVO -->
   <input type="checkbox" id="consentCheckbox" />
-  <label for="consentCheckbox">Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
+  <label for="consentCheckbox">
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
+    <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
+  </label>
 
   <br><br>
   <button id="analyzeButton">Analyse starten</button>
 
   <div id="loader"></div>
 
+  <!-- 💬 Ausgabe -->
   <div id="result" style="margin-top:2em;"></div>
   <div id="emojiWarnings"></div>
 
+  <!-- 📋 Vorschlag -->
   <div id="rewriteSection">
     <strong>Vorschlag zum Kopieren:</strong><br>
     <pre id="rewriteText"></pre>
