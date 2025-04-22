@@ -1,84 +1,86 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>achtung.live – Emoji-Sicherheitsprüfung</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" />
+  <meta charset="UTF-8">
+  <title>Rewrite & Datenschutzcheck inkl. Emojis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #ffffff;
+      background: #fff;
       color: #002244;
-      padding: 40px;
-      max-width: 720px;
+      max-width: 800px;
       margin: auto;
+      padding: 30px;
     }
-    h1 {
-      color: #cc0000;
-      font-weight: 600;
-    }
+    h1 { color: #cc0000; }
     textarea {
-      width: 100%;
-      height: 120px;
-      padding: 12px;
-      font-size: 1em;
+      width: 100%; height: 120px;
+      font-size: 1em; padding: 12px;
+      margin: 12px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
-      margin-bottom: 16px;
     }
     button {
-      background-color: #cc0000;
-      color: white;
-      border: none;
+      background: #cc0000; color: white;
       padding: 10px 20px;
       font-size: 1em;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
     }
     #loader {
       display: none;
-      margin-top: 10px;
+      margin: 12px 0;
+      font-style: italic;
     }
-    #result {
-      margin-top: 30px;
-      white-space: pre-wrap;
-      font-size: 1em;
-    }
+    #result { margin-top: 30px; white-space: pre-wrap; }
     #emojiWarnings div {
+      margin-top: 12px;
       background: #fff3cd;
       border-left: 4px solid #ffc107;
       padding: 12px;
-      margin: 12px 0;
       border-radius: 4px;
-      position: relative;
-      font-size: 0.95em;
     }
-    #emojiWarnings div span {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      cursor: help;
-      color: #cc0000;
-      font-weight: bold;
-    }
-    a {
-      color: #cc0000;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
+    a { color: #cc0000; }
+    label, select { display: block; margin-top: 12px; }
+    footer {
+      margin-top: 60px;
+      font-size: 0.9em;
+      color: #666;
+      border-top: 1px solid #ccc;
+      padding-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>achtung.live</h1>
-  <p><strong>Testumgebung:</strong> Emoji-Sensitivitätsprüfung</p>
-  <textarea id="userText" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
-  <button id="analyzeButton">Jetzt analysieren</button>
-  <div id="loader">GPT denkt nach...</div>
+  <h1>[achtung.live]</h1>
+  <p id="introText">Rewrite- & Emoji-Datenschutzanalyse</p>
+
+  <label for="languageSelect">🌐 Sprache wählen:</label>
+  <select id="languageSelect">
+    <option value="de">Deutsch</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+  </select>
+
+  <textarea id="userText" placeholder="Geben Sie Ihren Text hier ein..."></textarea>
+
+  <label>
+    <input type="checkbox" id="consentCheckbox" />
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="#" target="_blank">Datenschutzerklärung</a> zu.
+  </label>
+
+  <button id="analyzeButton">Analyse starten</button>
+  <div id="loader">⚙️ Analyse und Optimierung läuft...</div>
+
   <div id="result"></div>
   <div id="emojiWarnings"></div>
+
+  <footer>
+    ℹ️ Diese Seite verwendet GPT-basierte KI zur Textanalyse gemäß <strong>EU AI Act</strong>. Ihre Eingabe wird anonymisiert verarbeitet. Mehr erfahren: 
+    <a href="https://digital-strategy.ec.europa.eu/en/policies/european-ai-act" target="_blank">EU AI Act</a>
+  </footer>
 
   <script src="script.js"></script>
 </body>
