@@ -28,7 +28,8 @@ document.addEventListener("DOMContentLoaded", function () {
       loader.style.display = "none";
 
       if (data.gpt_output) {
-        resultContainer.innerHTML = `<pre style="white-space: pre-wrap;">${data.gpt_output}</pre>`;
+        resultContainer.innerHTML = `<div style="white-space: pre-wrap;">${data.gpt_output}</div>`;
+        
       } else {
         resultContainer.innerHTML = "⚠️ Keine Vorschläge gefunden.<br><br><strong>GPT-Rohantwort:</strong><br>Keine Antwort erhalten.";
       }
