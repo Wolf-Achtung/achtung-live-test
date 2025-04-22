@@ -37,7 +37,8 @@ Struktur der Ausgabe:
 [Warum ist dieser Inhalt kritisch?]
 
 **achtung.live-Empfehlung:**  
-[Praxis-Tipp – inklusive Link zu seriöser Info (z. B. datenschutz.org oder bund.de)]
+Formulieren Sie praktische Hinweise und nutzen Sie, wenn möglich, sichere Informationsquellen als HTML-Link:  
+`<a href='https://www.bund.de/DE/...'>Datenschutz im Internet</a>`
 
 **Optionaler Vorschlag zur Umformulierung:**  
 [Nur wenn wirklich hilfreich – eine sichere, datenschutzsensible, empathische Version des Originaltexts.]
