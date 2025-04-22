@@ -3,15 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>achtung.live – Rewrite-Demo</title>
-  <script src="script.js" defer></script>
-  <link rel="stylesheet" href="style.css" />
+  <title>achtung.live – Textanalyse</title>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      padding: 2rem;
+      background-color: #f5f5f5;
+      color: #222;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-size: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background-color: #e30613;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #loader {
+      margin-top: 1rem;
+      color: #e30613;
+      font-weight: bold;
+    }
+    #result {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #fff;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
-  <h1>[achtung.live] – Rewrite-Demo</h1>
-  <textarea id="inputText" placeholder="Gib deinen Text hier ein..."></textarea>
-  <button onclick="analyzeText()">🔍 Rewrite starten</button>
-  <div id="output"></div>
+  <h1>achtung.live – Rewrite & Datenschutzcheck</h1>
+  <p>Geben Sie Ihren Text ein:</p>
+  <textarea id="userText" placeholder="Ich war bei Dr. Meier wegen Depression. Sertralin ist das neue Medikament."></textarea>
+  <br>
+  <button id="analyzeButton">Analysieren</button>
+  <div id="loader" style="display: none;">🔄 GPT denkt nach...</div>
+  <div id="result"></div>
+
+  <!-- Script einbinden -->
   <script src="script.js"></script>
 </body>
 </html>
