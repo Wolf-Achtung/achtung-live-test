@@ -2,111 +2,106 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
     body {
-      font-family: system-ui, sans-serif;
-      margin: 20px;
-      background-color: #fff;
-      color: #111;
-    }
-
-    h1 {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
       color: #1a1a1a;
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1rem;
+      line-height: 1.6;
     }
-
+    h1 {
+      color: #b30000;
+    }
     textarea {
       width: 100%;
-      min-height: 120px;
+      height: 150px;
       font-size: 1rem;
-      padding: 10px;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
     }
-
-    button {
-      background-color: #cc0000;
-      color: white;
-      font-size: 1rem;
-      padding: 12px 20px;
-      border: none;
-      cursor: pointer;
-      margin-top: 15px;
-      touch-action: manipulation;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #a80000;
-    }
-
     #output {
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #f9f9f9;
-      border-left: 5px solid #cc0000;
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      background: #fafafa;
+      border-radius: 6px;
+      white-space: normal;
     }
-
-    .label {
-      font-weight: bold;
-      color: #cc0000;
-      margin-top: 1em;
+    #loader {
+      font-style: italic;
+      margin-top: 1rem;
+      color: #666;
     }
-
-    .language-switch {
-      margin-top: 10px;
+    .trusted-link {
+      color: #0052cc;
+      text-decoration: underline;
+      cursor: help;
     }
-
-    .flag-button {
-      background: none;
-      border: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      margin-right: 8px;
-      padding: 0;
+    .tooltip {
+      position: relative;
     }
-
-    @media screen and (max-width: 600px) {
+    .tooltip:hover::after {
+      content: attr(title);
+      position: absolute;
+      background: #fff0f0;
+      color: #b30000;
+      border: 1px solid #b30000;
+      padding: 5px 8px;
+      border-radius: 4px;
+      top: 100%;
+      left: 0;
+      width: max-content;
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .consent {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    select, label {
+      margin-top: 1rem;
+      display: block;
+    }
+    @media (max-width: 600px) {
       textarea {
-        font-size: 1rem;
+        height: 120px;
       }
-
-      button {
-        width: 100%;
-      }
-
-      .flag-button {
-        font-size: 1.6rem;
+      body {
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</h1>
 
-  <label for="inputText">🔎 Zu analysierender Text:</label><br />
-  <textarea id="inputText" placeholder="Gib deinen Text hier ein…"></textarea>
+  <h1>[achtung.live]</h1>
+  <p>Automatische Analyse und Korrektur von sensiblen Inhalten – inkl. Emoji-Prüfung, Linkcheck und Rewrite-Vorschlägen.</p>
 
-  <div class="language-switch">
-    <button class="flag-button" onclick="setLanguage('de')">🇩🇪</button>
-    <button class="flag-button" onclick="setLanguage('en')">🇬🇧</button>
-    <button class="flag-button" onclick="setLanguage('fr')">🇫🇷</button>
-  </div>
+  <label for="userInput">📝 Geben Sie Ihren Text ein:</label>
+  <textarea id="userInput" placeholder="z. B. Anbei der Befund vom Hausarzt 💊..."></textarea>
 
-  <br />
+  <label for="language">🌐 Sprache wählen:</label>
+  <select id="language">
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="it">🇮🇹 Italiano</option>
+    <option value="es">🇪🇸 Español</option>
+  </select>
 
-  <label>
-    <input type="checkbox" id="consentCheckbox" checked />
-    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
-    <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
+  <label class="consent">
+    <input type="checkbox" id="consentCheckbox" />
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
   </label>
 
-  <div id="consentWarning" style="color: #cc0000; font-weight: bold; display: none;">
-    ❗ Bitte der Analyse zustimmen.
-  </div>
-
-  <br />
-  <button onclick="analyzeText()" id="analyzeBtn">Analyse starten</button>
-
+  <div id="loader"></div>
   <div id="output"></div>
 
   <script src="script.js"></script>

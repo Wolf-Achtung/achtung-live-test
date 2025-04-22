@@ -1,108 +1,74 @@
-let selectedLanguage = 'de';
-const inputField = document.getElementById('inputText');
-const output = document.getElementById('output');
-const consentCheckbox = document.getElementById('consentCheckbox');
-const consentWarning = document.getElementById('consentWarning');
+const backendURL = "https://web-production-f8648.up.railway.app/debug-gpt";
+const input = document.getElementById("userInput");
+const output = document.getElementById("output");
+const loader = document.getElementById("loader");
+const languageSelector = document.getElementById("language");
+const consentCheckbox = document.getElementById("consentCheckbox");
 
-function setLanguage(lang) {
-  selectedLanguage = lang;
-  analyzeText(); // neue Analyse bei Sprachwechsel
-}
+input.addEventListener("input", debounce(() => {
+  if (consentCheckbox.checked) {
+    startAnalysis();
+  } else {
+    output.innerHTML = "<span style='color:red;'>Bitte stimmen Sie der Analyse gemäß DSGVO zu.</span>";
+  }
+}, 1200));
 
-function showLoader() {
-  output.innerHTML = '<p><em>🔄 Analyse läuft, Optimierung wird erstellt...</em></p>';
-}
+function startAnalysis() {
+  const userInput = input.value.trim();
+  const lang = languageSelector.value;
 
-function analyzeText() {
-  const input = inputField.value.trim();
-
-  if (!consentCheckbox.checked) {
-    consentWarning.style.display = 'block';
+  if (!userInput) {
+    output.innerHTML = "";
     return;
   }
 
-  consentWarning.style.display = 'none';
-  if (!input) return;
+  loader.innerText = "Analyse läuft, Optimierung wird erstellt...";
+  output.innerHTML = "";
 
-  showLoader();
-
-  fetch("https://web-production-f8648.up.railway.app/analyze", {
+  fetch(backendURL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text: input, language: selectedLanguage }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: userInput, lang: lang })
   })
-    .then((res) => res.json())
-    .then((data) => {
-      if (!data || !data.result) {
-        output.innerHTML = "⚠️ Keine Vorschläge gefunden.";
-        return;
+    .then(res => res.json())
+    .then(data => {
+      loader.innerText = "";
+      if (data.error) {
+        output.innerHTML = `<span style='color:red;'>❌ Fehler: ${data.error}</span>`;
+      } else {
+        const formatted = formatGPTOutput(data.formatted || data.gpt_raw || "⚠️ Keine Antwort erhalten");
+        output.innerHTML = formatted;
+        applyTooltipsToLinks();
       }
-
-      let result = data.result;
-
-      // Link-Tooltips einbauen
-      result = result.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
-        `<a href="$2" target="_blank" title="Geprüfter Link – sicher laut Quelle">$1</a>`
-      );
-
-      // Abschnitte optisch strukturieren
-      const sectionLabels = [
-        'Erkannte Datenarten',
-        'Datenschutz-Risiko',
-        'Bedeutung',
-        'achtung.live-Empfehlung',
-        'Tipp',
-        'Quelle',
-      ];
-
-      sectionLabels.forEach((label) => {
-        const regex = new RegExp(`\\*\\*${label}\\*\\*`, 'g');
-        result = result.replace(
-          regex,
-          `<span class="label">${label}</span>`
-        );
-      });
-
-      // Vorschlag extrahieren
-      const match = result.match(/"Vorschlag zum Kopieren:"\s*\n\s*["“](.+?)["”]/);
-      let copyBox = '';
-      if (match && match[1]) {
-        const suggestion = match[1];
-        copyBox = `
-          <div style="margin-top: 20px; padding: 10px; background: #f4f4f4; border-left: 4px solid #cc0000;">
-            <strong>Vorschlag zum Kopieren:</strong><br>
-            <code id="copyText">${suggestion}</code><br>
-            <button onclick="copySuggestion()" style="margin-top: 5px; background: #cc0000; color: white; border: none; padding: 5px 10px;">📋 Vorschlag kopieren</button>
-          </div>
-        `;
-      }
-
-      output.innerHTML = `<div>${result}</div>${copyBox}`;
     })
-    .catch((error) => {
-      output.innerHTML = `❌ Fehler: ${error}`;
+    .catch(err => {
+      loader.innerText = "";
+      output.innerHTML = `<span style='color:red;'>❌ Fehler: ${err.message}</span>`;
     });
 }
 
-function copySuggestion() {
-  const copyText = document.getElementById("copyText");
-  if (copyText) {
-    navigator.clipboard.writeText(copyText.textContent).then(() => {
-      alert("✅ Vorschlag wurde in die Zwischenablage kopiert.");
+function formatGPTOutput(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong style='color:#b30000;'>$1</strong>")
+    .replace(/\n{2,}/g, "<br><br>")
+    .replace(/\n/g, "<br>")
+    .replace(/(https?:\/\/[^\s]+)/g, (match) => {
+      return `<a href="${match}" target="_blank" class="trusted-link">${match}</a>`;
     });
-  }
 }
 
-// Auto-Analyse beim Tippen (mit Pause)
-let typingTimer;
-inputField.addEventListener('input', () => {
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => {
-    if (inputField.value.trim().length > 5) {
-      analyzeText();
-    }
-  }, 800);
-});
+function applyTooltipsToLinks() {
+  const links = document.querySelectorAll(".trusted-link");
+  links.forEach(link => {
+    link.classList.add("tooltip");
+    link.setAttribute("title", "Diese Quelle wurde als vertrauenswürdig eingestuft.");
+  });
+}
+
+function debounce(fn, delay) {
+  let timeout;
+  return function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, arguments), delay);
+  };
+}
