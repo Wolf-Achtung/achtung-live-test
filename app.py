@@ -7,52 +7,69 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# 🔐 OpenAI-Client (API-Key wird automatisch aus Umgebungsvariable genutzt)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔍 Kategorisierte Schlüsselwörter für dynamisches Prompt-Routing
 PROMPT_CATEGORIES = {
     "medizinisch": ["Diagnose", "Rezept", "Arzt", "Krankheit", "Therapie", "Medikament"],
     "finanziell": ["IBAN", "Kreditkarte", "Gehalt", "Bank", "Investition", "Schulden"],
     "emotional": ["Beziehung", "Depression", "Verlust", "Angst", "Trauma", "intim"]
 }
 
-# 📋 Prompt-Vorlagen
 PROMPTS = {
-    "medizinisch": """Analysieren Sie den folgenden Text auf medizinisch sensible Informationen wie Krankheiten, Medikamente, Diagnosen oder Arztkontakte. Wenn Sie solche Inhalte finden, bieten Sie eine strukturierte Analyse:
-1. Erkannte Datenarten
-2. Datenschutz-Risiko (Ampel)
-3. Empathische Erklärung + Empfehlung
-4. Praktischer Tipp (ggf. Link)
-5. Quelle""",
-    "finanziell": """Prüfen Sie den folgenden Text auf finanzsensible Angaben wie Kontodaten, Kreditkartennummern, Gehälter oder Schulden. Wenn vorhanden, ersetzen Sie diese durch anonyme, aber inhaltlich passende Umschreibungen. Strukturieren Sie Ihre Antwort:
-1. Datenarten
-2. Risiko (Ampel)
-3. Erklärung
-4. Konkreter Tipp mit Link
-5. Quelle""",
-    "emotional": """Bitte überprüfen Sie folgenden Text auf emotional sensible Aussagen (z. B. über Beziehungskrisen, psychische Belastung, intime Erlebnisse). Wenn vorhanden, analysieren Sie:
-1. Welche sensiblen Aussagen enthalten sind
-2. Ampel-Risiko
-3. Warum diese problematisch sein könnten
-4. Konkrete Handlungsempfehlung
-5. Quelle (falls vorhanden)""",
-    "standard": """Sie sind ein empathischer Datenschutz-Coach. Bitte analysieren Sie den folgenden Text. Wenn sensible Informationen erkannt werden:
-1. Nennen Sie die erkannten Datenarten.
-2. Bewerten Sie das Datenschutzrisiko mit einer Ampel (🟢, 🟡, 🔴).
-3. Erklären Sie, warum diese Daten kritisch sind.
-4. Geben Sie eine konkrete Handlungsempfehlung – mit Link zu einer sicheren Methode.
-5. Quelle."""
+    "medizinisch": """Sie sind Datenschutz-Coach. Analysieren Sie den folgenden Text auf medizinisch sensible Informationen (Krankheiten, Diagnosen, Medikamente, Arztkontakte). Wenn solche enthalten sind:
+
+1. Listen Sie die Datenarten konkret auf.
+2. Bewerten Sie das Risiko vorsorglich mit einer Ampel (🟢 / 🟡 / 🔴).
+3. Erläutern Sie, warum diese Infos vertraulich sind – einfach, empathisch.
+4. Geben Sie einen konkreten Vorschlag, wie der Nutzer diese Information sicherer übermitteln oder anonymisieren kann – für Laien verständlich.
+5. Fügen Sie eine Quelle oder Anleitung als Link hinzu.""",
+
+    "finanziell": """Sie sind Datenschutz-Coach. Prüfen Sie den Text auf finanzsensible Angaben (IBAN, Kreditkartennummer, Gehalt, Bankverbindung, Schulden, Verträge). Wenn vorhanden:
+
+1. Nennen Sie die sensiblen Datenarten.
+2. Setzen Sie das Risiko mindestens auf 🟡, bei Konto- oder Kartennummern auf 🔴.
+3. Erklären Sie ruhig, warum diese Angaben riskant sind.
+4. Geben Sie einen praktischen, einfach umsetzbaren Tipp – inkl. Link zur sicheren Methode.
+5. Strukturieren Sie die Antwort klar, verwenden Sie keinen Tech-Jargon.""",
+
+    "emotional": """Sie sind ein einfühlsamer Datenschutz-Coach. Analysieren Sie den Text auf emotional sensible Inhalte (Beziehungskrisen, psychische Belastung, intime Themen, Trauer). Wenn Sie solche Inhalte finden:
+
+1. Nennen Sie die erkannten Aussagen.
+2. Bewerten Sie das Risiko – schon bei potenzieller Stigmatisierung mit 🟡 oder 🔴.
+3. Erläutern Sie ruhig und respektvoll, warum Diskretion wichtig ist.
+4. Geben Sie einen konkreten, leicht umsetzbaren Tipp zur sicheren Kommunikation.
+5. Geben Sie, wenn möglich, einen Link mit Anleitung an.""",
+
+    "standard": """Sie sind ein empathischer Datenschutz-Coach. Bitte analysieren Sie den folgenden Text. Wenn sensible Inhalte enthalten sind (persönlich, medizinisch, finanziell, emotional):
+
+1. Nennen Sie die Datenarten.
+2. Bewerten Sie das Risiko vorsorglich mit Ampel (🟢, 🟡, 🔴) – lieber zu streng als zu tolerant.
+3. Erklären Sie einfach, warum das problematisch sein kann.
+4. Geben Sie einen klaren Vorschlag zur sicheren Übermittlung oder Umschreibung – mit Link für technisch Unerfahrene.
+5. Strukturieren Sie die Antwort wie folgt:
+
+---
+**Erkannte Datenarten:**  
+...
+
+**Datenschutz-Risiko:** 🟡 Mögliches Risiko
+
+**achtung.live-Empfehlung:**  
+...
+
+**Tipp:**  
+...
+
+**Quelle:**  
+..."""
 }
 
-# 🔁 Auswahl der passenden Prompt-Vorlage
 def choose_prompt(text):
     for category, keywords in PROMPT_CATEGORIES.items():
         if any(kw.lower() in text.lower() for kw in keywords):
             return PROMPTS[category]
     return PROMPTS["standard"]
 
-# 🤖 GPT-Kommunikation mit OpenAI v1
 def call_gpt(prompt, user_text):
     full_prompt = f"{prompt}\n\nText:\n{user_text}"
     response = client.chat.completions.create(
@@ -62,7 +79,6 @@ def call_gpt(prompt, user_text):
     )
     return response.choices[0].message.content
 
-# 🧠 Textanalyse-Ausgabe extrahieren & strukturieren
 def extract_structured_json(raw_text):
     detected = re.findall(r"(?i)Erkannte Datenarten:?\s*(.+?)\n", raw_text)
     risk = re.findall(r"(?i)Datenschutz[- ]?Risiko:?\s*(🟢|🟡|🔴.*?)\n", raw_text)
@@ -70,15 +86,23 @@ def extract_structured_json(raw_text):
     tip = re.findall(r"(?i)Tipp:?\s*(.+?)(?:\n|Quelle:)", raw_text, re.DOTALL)
     source = re.findall(r"(?i)Quelle:?\s*(https?://\S+)", raw_text)
 
+    # 🔒 Nachträgliche Risiko-Verschärfung bei sensiblen Begriffen
+    raw_lower = raw_text.lower()
+    if any(word in raw_lower for word in ["iban", "kreditkarte", "bankkonto"]):
+        risk_level = "🔴 Finanzdaten erkannt – sehr hohes Risiko"
+    elif any(word in raw_lower for word in ["medikament", "diagnose", "krankheit"]):
+        risk_level = "🟡 Vorsicht – medizinische Angabe erkannt"
+    else:
+        risk_level = risk[0].strip() if risk else "🟢 Kein Risiko"
+
     return {
         "detected_data": detected[0].strip() if detected else "Keine",
-        "risk_level": risk[0].strip() if risk else "🟢 Kein Risiko",
+        "risk_level": risk_level,
         "explanation": explanation[0].strip() if explanation else "Keine Empfehlung verfügbar.",
         "tip": tip[0].strip() if tip else "Kein Tipp verfügbar.",
         "source": source[0].strip() if source else ""
     }
 
-# 🔐 Haupt-Endpunkt für Analyse
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
@@ -88,7 +112,6 @@ def analyze():
     structured = extract_structured_json(gpt_response)
     return jsonify(structured)
 
-# ✅ Startseite zum Test
 @app.route("/", methods=["GET"])
 def home():
     return "achtung.live API ist aktiv"
