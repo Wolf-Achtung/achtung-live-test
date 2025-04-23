@@ -80,13 +80,24 @@ def call_gpt(prompt, user_text):
     return response.choices[0].message.content
 
 def extract_structured_json(raw_text):
-    detected = re.findall(r"(?i)Erkannte Datenarten:?\s*(.+?)\n", raw_text)
+    # Datenarten (unterstützt auch Aufzählungspunkte)
+    detected_block = re.search(r"(?i)Erkannte Datenarten:([\s\S]+?)\n\n", raw_text)
+    if detected_block:
+        raw_detected = detected_block.group(1).strip()
+        detected_items = re.findall(r"-\s*(.+)", raw_detected)
+        detected_data = ", ".join(detected_items) if detected_items else raw_detected
+    else:
+        detected_data = "Keine"
+
+    # Risiko (einzeilig)
     risk = re.findall(r"(?i)Datenschutz[- ]?Risiko:?\s*(🟢|🟡|🔴.*?)\n", raw_text)
-    explanation = re.findall(r"(?i)achtung\.live-Empfehlung:?\s*(.+?)(?:\n|Tipp:)", raw_text, re.DOTALL)
-    tip = re.findall(r"(?i)Tipp:?\s*(.+?)(?:\n|Quelle:)", raw_text, re.DOTALL)
+
+    # Empfehlung, Tipp, Quelle
+    explanation = re.findall(r"(?i)achtung\.live-Empfehlung:?\s*(.+?)(?:\nTipp:|\nQuelle:|\Z)", raw_text, re.DOTALL)
+    tip = re.findall(r"(?i)Tipp:?\s*(.+?)(?:\nQuelle:|\Z)", raw_text, re.DOTALL)
     source = re.findall(r"(?i)Quelle:?\s*(https?://\S+)", raw_text)
 
-    # 🔒 Nachträgliche Risiko-Verschärfung bei sensiblen Begriffen
+    # Risikoanpassung bei Schlüsselwörtern (Fallback bei zu laschem GPT)
     raw_lower = raw_text.lower()
     if any(word in raw_lower for word in ["iban", "kreditkarte", "bankkonto"]):
         risk_level = "🔴 Finanzdaten erkannt – sehr hohes Risiko"
@@ -96,10 +107,10 @@ def extract_structured_json(raw_text):
         risk_level = risk[0].strip() if risk else "🟢 Kein Risiko"
 
     return {
-        "detected_data": detected[0].strip() if detected else "Keine",
+        "detected_data": detected_data,
         "risk_level": risk_level,
-        "explanation": explanation[0].strip() if explanation else "Keine Empfehlung verfügbar.",
-        "tip": tip[0].strip() if tip else "Kein Tipp verfügbar.",
+        "explanation": explanation[0].strip() if explanation else "Bitte prüfen Sie, ob diese Angabe vertraulich ist.",
+        "tip": tip[0].strip() if tip else "Wir empfehlen, diese Information nur verschlüsselt oder anonymisiert zu übermitteln.",
         "source": source[0].strip() if source else ""
     }
 
