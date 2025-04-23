@@ -1,80 +1,77 @@
 const loader = document.getElementById("loader");
 const result = document.getElementById("result");
-const textInput = document.getElementById("textInput");
-const consentCheckbox = document.getElementById("consent");
+const form = document.getElementById("form");
 const languageSelect = document.getElementById("language");
+const consentCheckbox = document.getElementById("consent");
 
-const API_URL = "https://web-production-f8648.up.railway.app/analyze";
-
-function startAnalysis() {
+async function startAnalysis() {
   if (!consentCheckbox.checked) {
-    result.innerHTML = "❌ Bitte stimmen Sie der DSGVO-Verarbeitung zu.";
+    result.innerHTML = `<p style="color:red;">❗Bitte stimmen Sie der Analyse zu (DSGVO-Zustimmung erforderlich).</p>`;
     return;
   }
 
-  const text = textInput.value.trim();
-  if (!text) {
-    result.innerHTML = "❌ Bitte geben Sie einen Text ein.";
+  const userText = document.getElementById("userInput").value;
+  if (!userText.trim()) {
+    result.innerHTML = `<p style="color:red;">Bitte geben Sie einen Text ein.</p>`;
     return;
   }
 
-  loader.innerText = "🧠 Analyse läuft, Optimierung wird erstellt...";
+  loader.innerText = "🧠 Analyse läuft, bitte warten...";
   result.innerHTML = "";
 
-  fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ text })
-  })
-  .then(response => response.json())
-  .then(data => {
-    loader.innerText = "";
+  try {
+    const response = await fetch("https://web-production-f8648.up.railway.app/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: userText,
+        language: languageSelect.value
+      }),
+    });
+
+    const data = await response.json();
 
     if (data.error) {
-      result.innerHTML = `❌ Fehler: ${data.error}`;
+      result.innerHTML = `<p style="color:red;">❌ Fehler: ${data.error}</p>`;
+      loader.innerText = "";
       return;
     }
 
-    const formatted = formatGPTOutput(data.result);
-    result.innerHTML = formatted;
+    const formattedGPT = formatGPT(data.gpt_response);
+    const emojiHints = data.emojis.map(e =>
+      `<li title="${e.bedeutung} – ${e.kontext}"><strong>${e.emoji}</strong>: ${e.bedeutung} (${e.kontext})</li>`
+    ).join("");
 
-    if (data.emojis && data.emojis.length > 0) {
-      injectTooltips(data.emojis);
-    }
-  })
-  .catch(err => {
+    const links = data.links.map(l =>
+      `<li><a href="${l.url}" target="_blank">${l.url}</a> – <span title="Verifiziert durch Linkprüfung">${l.status}</span></li>`
+    ).join("");
+
+    result.innerHTML = `
+      <div class="box">
+        ${formattedGPT}
+        ${emojiHints ? `<h4>🧩 Emoji-Analyse:</h4><ul>${emojiHints}</ul>` : ""}
+        ${links ? `<h4>🔗 Linkprüfung:</h4><ul>${links}</ul>` : ""}
+      </div>`;
     loader.innerText = "";
-    result.innerHTML = `❌ Fehler: ${err.message}`;
-  });
-}
-
-// 🔠 GPT-Ergebnis strukturieren
-function formatGPTOutput(text) {
-  let html = text
-    .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#C9002B;">$1</strong>')
-    .replace(/\n\n/g, "<br><br>")
-    .replace(/\n/g, "<br>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#0052cc;">$1</a>');
-  return html;
-}
-
-// ℹ️ Emojis markieren mit Tooltip
-function injectTooltips(emojis) {
-  emojis.forEach(emojiData => {
-    const tooltip = `
-      <span class="emoji-tooltip" title="Bedeutung: ${emojiData.bedeutung} – ${emojiData.kontext}">
-        ${emojiData.emoji}
-      </span>
-    `;
-    result.innerHTML = result.innerHTML.replaceAll(emojiData.emoji, tooltip);
-  });
-}
-
-// ✨ Analyse auch beim Tippen optional starten
-textInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && e.ctrlKey) {
-    startAnalysis();
+  } catch (error) {
+    result.innerHTML = `<p style="color:red;">❌ Fehler: ${error}</p>`;
+    loader.innerText = "";
   }
-});
+}
+
+function formatGPT(text) {
+  const labels = [
+    "Erkannte Datenarten", "Datenschutz-Risiko", "Bedeutung",
+    "achtung.live-Empfehlung", "Tipp", "Quelle"
+  ];
+  let html = text;
+  labels.forEach(label => {
+    const regex = new RegExp(`\\*{0,2}${label}\\*{0,2}`, "gi");
+    html = html.replace(regex, `<strong style="color:#b30000;">${label}</strong>`);
+  });
+
+  html = html.replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+  return `<div>${html}</div>`;
+}
