@@ -2,106 +2,124 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>[achtung.live] – Datenschutzanalyse & Rewrite</title>
   <style>
     body {
-      font-family: Inter, sans-serif;
-      background: #ffffff;
-      color: #222;
-      margin: 0;
-      padding: 2rem;
-      line-height: 1.6;
+      font-family: "Inter", sans-serif;
+      margin: 2rem;
+      color: #1a1a1a;
+      background-color: #f9f9f9;
     }
 
     textarea {
       width: 100%;
-      height: 120px;
+      height: 140px;
       font-size: 1rem;
       padding: 1rem;
-      margin-top: 1rem;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    select, label {
-      margin-top: 1rem;
-      display: block;
+      resize: vertical;
     }
 
     button {
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
       margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
       background-color: #0052cc;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #003f99;
+    select {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 5px;
     }
 
-    .consent {
-      margin-top: 1rem;
+    .tooltip {
+      position: relative;
+      cursor: help;
+      text-decoration: underline dotted;
+      color: #0052cc;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 180px;
+      background-color: #eaf4ff;
+      color: #000;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 6px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -90px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    footer {
+      margin-top: 3rem;
       font-size: 0.9rem;
-    }
-
-    #loader {
-      margin-top: 1rem;
-      font-weight: bold;
       color: #666;
     }
 
     .wcag-label {
-      font-size: 0.8rem;
-      margin-top: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .wcag-label img {
-      height: 24px;
+      background-color: #dbeeff;
+      display: inline-block;
+      padding: 0.3rem 0.6rem;
+      margin-top: 1rem;
+      border-radius: 5px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live]</h1>
-  <p>Rewrite & Datenschutzcheck inkl. Emojis</p>
+  <h1>[achtung.live] Rewrite & Datenschutzcheck (inkl. Emojis)</h1>
 
-  <label for="language">Sprache wählen:</label>
-  <select id="language">
+  <label for="userInput">Text eingeben:</label><br />
+  <textarea id="userInput" placeholder="z.B. 'Mein Hautarzt hat mir... 💙'"></textarea>
+
+  <br><label for="languageSelect">Sprache wählen:</label><br />
+  <select id="languageSelect">
     <option value="de">🇩🇪 Deutsch</option>
     <option value="en">🇬🇧 English</option>
     <option value="fr">🇫🇷 Français</option>
+    <option value="es">🇪🇸 Español</option>
   </select>
 
-  <textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
-
-  <!-- Consent-Checkbox -->
-  <div class="consent">
-    <label><input type="checkbox" id="consentCheckbox" /> Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="/datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
-  </div>
+  <br><br>
+  <input type="checkbox" id="consentCheckbox" />
+  <label for="consentCheckbox">Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="#">Datenschutzerklärung</a> zu.</label>
 
   <!-- Analyse-Button -->
-  <div style="margin-top: 1rem; text-align: left;">
+  <div style="margin-top: 1rem;">
     <button onclick="startAnalysis()">🧠 Analyse starten</button>
   </div>
 
-  <!-- Ergebnis -->
-  <div id="loader"></div>
-  <div id="result" style="margin-top:2rem;"></div>
+  <div id="loader" style="margin-top: 1rem; color: #0052cc; font-weight: bold;"></div>
+  <div id="resultArea" style="margin-top: 2rem; font-size: 1.05rem;"></div>
 
-  <!-- WCAG-Label -->
-  <div class="wcag-label">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/02/WCAG_icon.svg" alt="WCAG-Icon">
-    <span>Barrierefreiheit: WCAG-konform geprüft</span>
-  </div>
+  <div class="wcag-label">✅ WCAG-konform geprüft</div>
 
-  <!-- Script -->
+  <footer>
+    <hr />
+    <p>
+      🔐 DSGVO-konform & geprüft | Konform mit EU AI Act (Stand 2025) <br />
+      <small>Hinweis: Dieses Tool ersetzt keine juristische Beratung.</small>
+    </p>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
