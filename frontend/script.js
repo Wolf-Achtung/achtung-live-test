@@ -29,13 +29,20 @@ async function startAnalysis() {
     const data = await response.json();
     loader.style.display = "none";
 
-    if (data.result) {
-      const resultWithLinks = data.result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-      resultContainer.innerHTML = resultWithLinks;
-    } else if (data.error) {
-      displayError(`❌ Fehler: ${data.error}`);
+    if (data) {
+      const html = `
+        <div class="feedback-box">
+          <p><strong>Erkannte Datenarten:</strong> ${data.detected_data}</p>
+          <p><strong>Datenschutz-Risiko:</strong> ${data.risk_level}</p>
+          <p><strong>achtung.live-Empfehlung:</strong> ${data.explanation}</p>
+          <p><strong>Tipp:</strong> ${data.tip}</p>
+          ${data.source ? `<p><strong>Quelle:</strong> <a href="${data.source}" target="_blank">${data.source}</a></p>` : ""}
+          <button onclick="copySuggestion()">📋 Vorschlag kopieren</button>
+        </div>
+      `;
+      resultContainer.innerHTML = html;
     } else {
-      displayError("❌ Keine Antwort erhalten.");
+      displayError("❌ Keine verwertbare Analyse erhalten.");
     }
   } catch (error) {
     loader.style.display = "none";
@@ -46,4 +53,10 @@ async function startAnalysis() {
 function displayError(message) {
   const resultContainer = document.getElementById("result");
   resultContainer.innerHTML = `<div class="error">${message}</div>`;
+}
+
+function copySuggestion() {
+  const text = document.getElementById("result").innerText;
+  navigator.clipboard.writeText(text);
+  alert("✅ Textvorschlag wurde kopiert.");
 }
