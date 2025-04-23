@@ -1,16 +1,19 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
 import os
 import json
+import re
 import requests
+from openai import OpenAI
+from random import choice
 
 app = Flask(__name__)
 CORS(app)
 
+# OpenAI-Client initialisieren
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Trusted Links
+# Trusted Links laden
 try:
     with open("trusted_links.json", "r") as f:
         trusted_links = json.load(f)
@@ -18,19 +21,15 @@ except Exception as e:
     print(f"⚠️ trusted_links.json konnte nicht geladen werden: {e}")
     trusted_links = []
 
-# Helper: Linkscanner
-def scan_links(text):
-    import re
-    urls = re.findall(r'(https?://\S+)', text)
-    results = []
-    for url in urls:
+def get_trusted_link():
+    for _ in range(len(trusted_links)):
+        link = choice(trusted_links)
         try:
-            res = requests.head(url, timeout=5)
-            status = "✅ erreichbar" if res.status_code == 200 else f"⚠️ Status: {res.status_code}"
+            if requests.head(link["url"], timeout=5).status_code == 200:
+                return f"[{link['name']}]({link['url']})"
         except:
-            status = "❌ nicht erreichbar"
-        results.append({"url": url, "status": status})
-    return results
+            continue
+    return "*Keine verlässliche Quelle verfügbar*"
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -39,43 +38,52 @@ def analyze():
     lang = data.get("language", "de")
 
     prompt = f"""
-Sprache: {lang.upper()}
-Sie sind ein Datenschutz-Analysesystem, spezialisiert auf sensible Inhalte wie:
+Du bist ein Datenschutz-Coach mit medizinischem Feingefühl. Analysiere folgenden Text auf sensible Inhalte:
 
-- Medizinische Informationen (Diagnosen, Medikamente)
-- Emotionale Aussagen (z. B. Depression)
-- Identitätsdaten (Name, Adresse, Arzt)
-- Emojis mit kultureller/politischer Bedeutung
-- Verlinkte externe Inhalte (URLs)
-
-Analysieren Sie den folgenden Text auf Risiken.
-1. **Erkannte Datenarten**
-2. **Datenschutz-Risiko** (Ampel: 🟢🟡🔴)
-3. **Bedeutung der gefundenen Elemente**
-4. **achtung.live-Empfehlung** (konkret, empathisch, professionell)
-5. **Tipp: 1 sinnvoller Rewrite-Vorschlag**
-6. **Quelle** (falls Emoji oder rechtlicher Kontext)
-
-Geben Sie strukturiertes, hilfreiches Feedback zurück.
 Text:
 \"\"\"{user_input}\"\"\"
+
+Identifiziere:
+1. Welche Arten sensibler Daten kommen vor?
+2. Wie hoch ist das Datenschutz-Risiko (Ampel: 🟢, 🟡, 🔴)?
+3. Warum ist das riskant? (Begründung)
+4. Welche Empfehlung gibst du?
+5. Optional: 1 Rewrite-Vorschlag
+6. Quelle: Empfohlener Link (wenn sinnvoll)
+
+Antwort strukturiert im folgenden Format:
+
+1. **Erkannte Datenarten**  
+- [Liste der sensiblen Inhalte]
+
+2. **Datenschutz-Risiko**  
+- [Ampelsymbol]
+
+3. **Bedeutung der gefundenen Elemente**  
+- [Kurze Erklärung]
+
+4. **achtung.live-Empfehlung**  
+- [Empathische, klare Handlungsanweisung]
+
+5. **Tipp: 1 sinnvoller Rewrite-Vorschlag**  
+- "[Rewrite]"
+
+6. **Quelle**  
+- {get_trusted_link()}
+
+Wichtig: Der Rewrite-Vorschlag soll dem User konkret helfen. Wenn keine Überarbeitung nötig ist, diesen Punkt weglassen.
 """
 
     try:
         response = client.chat.completions.create(
             model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.6,
+            messages=[{ "role": "user", "content": prompt }],
+            temperature=0.7
         )
-        gpt_text = response.choices[0].message.content.strip()
-        links = scan_links(gpt_text)
-        return jsonify({"gpt_output": gpt_text, "link_check": links})
+        result = response.choices[0].message.content
+        return jsonify({ "result": result.strip() })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/")
-def root():
-    return "🚀 Achtung.live API bereit"
+        return jsonify({ "error": str(e) }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
