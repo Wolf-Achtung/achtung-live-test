@@ -2,127 +2,52 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>[achtung.live] – Datenschutzanalyse & Rewrite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>[achtung.live] Datenschutzanalyse</title>
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #ffffff;
-      color: #1d2d44;
-      margin: 0;
-      padding: 1rem;
-    }
-    h1 {
-      text-align: center;
-      color: #c20000;
-    }
-    textarea {
-      width: 100%;
-      height: 140px;
-      font-size: 1rem;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      resize: vertical;
-    }
-    #loader {
-      font-style: italic;
-      color: #888;
-      margin-top: 1rem;
-    }
-    #result {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border: 1px solid #ddd;
-      background: #f9f9f9;
-      border-radius: 6px;
-    }
-    button {
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
-      background-color: #0052cc;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .tooltip-box {
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #fff; color: #222; }
+    textarea { width: 100%; height: 150px; padding: 1rem; }
+    #loader { color: #0052cc; margin: 1rem 0; }
+    #result { border-top: 1px solid #ccc; padding-top: 1rem; }
+    footer { margin-top: 2rem; font-size: 0.9rem; color: #666; }
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
       position: absolute;
-      background: #fff8e1;
-      border: 1px solid #e0c671;
-      color: #333;
-      padding: 8px 12px;
-      border-radius: 6px;
+      background: #eee;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
       font-size: 0.85rem;
-      max-width: 300px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      display: none;
-      z-index: 9999;
-    }
-    .footer {
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      text-align: center;
-      color: #888;
-    }
-    .flag-select {
-      float: right;
-      margin-top: -3rem;
-    }
-    .flag-select select {
-      font-size: 0.9rem;
-      padding: 5px;
-    }
-    .consent-box {
-      margin: 1rem 0;
-    }
-    .accessibility-label {
-      text-align: center;
-      margin-top: 2rem;
-      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live]</h1>
 
-  <div class="flag-select">
-    <label for="language">🌐 Sprache:</label>
-    <select id="language" onchange="changeLanguage()">
-      <option value="de">🇩🇪 Deutsch</option>
-      <option value="en">🇬🇧 English</option>
-      <option value="fr">🇫🇷 Français</option>
-    </select>
-  </div>
+<h2>🛡️ [achtung.live] – Datenschutzanalyse und Korrektur</h2>
 
-  <textarea id="userText" placeholder="Geben Sie Ihren Text zur Prüfung ein..."></textarea>
+<textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
 
-  <div class="consent-box">
-    <input type="checkbox" id="consentCheckbox" />
-    <label for="consentCheckbox">
-      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
-    </label>
-  </div>
+<div>
+  <label for="language">Sprache:</label>
+  <select id="language">
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="fr">🇫🇷 Français</option>
+  </select>
+</div>
 
-  <!-- Analyse-Button -->
-  <div style="text-align: center;">
-    <button onclick="startAnalysis()">🧠 Analyse starten</button>
-  </div>
+<div style="margin-top: 1rem;">
+  <button id="analyze-btn" onclick="startAnalysis()">🧠 Analyse starten</button>
+</div>
 
-  <div id="loader"></div>
-  <div id="result"></div>
+<div id="loader" style="display:none;">Analyse läuft, bitte warten...</div>
 
-  <!-- Tooltip -->
-  <div id="tooltip" class="tooltip-box"></div>
+<div id="result"></div>
 
-  <div class="accessibility-label">
-    ✅ WCAG-konform geprüft | Barrierefreie Darstellung | Kontrast geprüft
-  </div>
+<footer>
+  <p>🔒 DSGVO-konform · 🧠 EU-AI-Act-ready · ♿ <span title="Barrierefrei nach WCAG-Richtlinien">WCAG geprüft</span></p>
+  <p><a href="datenschutz.html">Datenschutzerklärung</a></p>
+</footer>
 
-  <div class="footer">
-    © 2025 [achtung.live] · <a href="datenschutz.html" target="_blank">Datenschutz</a> · <a href="https://digital-strategy.ec.europa.eu/en/policies/european-ai-alliance" target="_blank">EU AI Act</a>
-  </div>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
