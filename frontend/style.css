@@ -22,18 +22,28 @@
 }
 
 .empathy-box {
-  background: #fff0f5;
-  border-left: 4px solid #e91e63;
   padding: 1rem;
-  margin-bottom: 1rem;
   border-radius: 6px;
+  margin-top: 1rem;
   font-style: italic;
 }
 
+.empathy-box.hoch {
+  background: #ffe6e6;
+  border-left: 4px solid #f44336;
+}
+.empathy-box.mittel {
+  background: #fff0f5;
+  border-left: 4px solid #e91e63;
+}
+.empathy-box.niedrig {
+  background: #f0f7ff;
+  border-left: 4px solid #2196f3;
+}
+
 .rewrite-box button {
-  background: #f3f3f3;
+  margin: 0.5rem 0.5rem 0 0;
   padding: 10px 14px;
-  border: 1px solid #ccc;
   border-radius: 6px;
   cursor: pointer;
 }

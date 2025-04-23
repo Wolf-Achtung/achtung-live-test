@@ -23,12 +23,13 @@ async function startAnalysis() {
   `;
 
   if (data.empathy_message) {
-    html += `<div class="empathy-box">${data.empathy_message}</div>`;
+    html += `<div class="empathy-box ${data.empathy_level}">${data.empathy_message}</div>`;
   }
-  if (data.rewrite_offer) {
+
+  if (data.risk_level !== "🟢 Kein Risiko") {
     html += `
       <div class="rewrite-box">
-        <button onclick="triggerRewrite()">🤖 Text schützen</button>
+        ${data.rewrite_offer ? `<button onclick="triggerRewrite()">🤖 Text schützen</button>` : ""}
         <button onclick="loadHowTo()">📩 Anleitung: Sicher senden</button>
       </div>
       <div id="howto-output" class="howto-box"></div>
@@ -56,4 +57,3 @@ async function loadHowTo() {
   const data = await res.json();
   output.innerHTML = `<pre>${data.howto}</pre>`;
 }
-
