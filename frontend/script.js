@@ -1,56 +1,49 @@
-const loader = document.getElementById("loader");
-const responseBlock = document.getElementById("responseBlock");
-const analysisOutput = document.getElementById("analysis");
-const consentCheckbox = document.getElementById("consentCheckbox");
-
-function startAnalysis() {
-  const inputText = document.getElementById("inputText").value.trim();
-
-  if (!consentCheckbox.checked) {
-    alert("Bitte stimmen Sie der Verarbeitung gemäß Datenschutzerklärung zu.");
+async function startAnalysis() {
+  const consent = document.getElementById("consentCheckbox").checked;
+  if (!consent) {
+    displayError("❗ Bitte stimmen Sie der Analyse gemäß Datenschutzbestimmungen zu.");
     return;
   }
 
+  const inputText = document.getElementById("textInput").value.trim();
   if (!inputText) {
-    alert("Bitte geben Sie einen Text ein.");
+    displayError("❗ Bitte geben Sie einen Text zur Analyse ein.");
     return;
   }
 
-  loader.innerText = "Analyse läuft, bitte warten...";
-  responseBlock.style.display = "block";
-  analysisOutput.innerHTML = "";
+  const resultContainer = document.getElementById("result");
+  const loader = document.getElementById("loader");
+  resultContainer.innerHTML = "";
+  loader.style.display = "block";
 
-  fetch("https://web-production-f8648.up.railway.app/analyze", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: inputText, language: "de" })
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      loader.innerText = "";
-      if (data.result) {
-        const parsed = parseGPTResponse(data.result);
-        analysisOutput.innerHTML = parsed;
-      } else {
-        analysisOutput.innerHTML = "❌ Fehler: " + data.error;
-      }
-    })
-    .catch((err) => {
-      loader.innerText = "";
-      analysisOutput.innerHTML = "❌ Fehler: " + err.message;
+  try {
+    const response = await fetch("https://web-production-f8648.up.railway.app/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: inputText,
+        language: document.getElementById("languageSelect").value,
+      }),
     });
+
+    const data = await response.json();
+    loader.style.display = "none";
+
+    if (data.result) {
+      const resultWithLinks = data.result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+      resultContainer.innerHTML = resultWithLinks;
+    } else if (data.error) {
+      displayError(`❌ Fehler: ${data.error}`);
+    } else {
+      displayError("❌ Keine Antwort erhalten.");
+    }
+  } catch (error) {
+    loader.style.display = "none";
+    displayError(`❌ Fehler: ${error.message}`);
+  }
 }
 
-function parseGPTResponse(response) {
-  let html = response
-    .replace(/1\.\s*Erkannte Datenarten/gi, "<span class='heading'>1. Erkannte Datenarten</span>")
-    .replace(/2\.\s*Datenschutz-Risiko.*?:/gi, "<span class='heading'>2. Datenschutz-Risiko</span>")
-    .replace(/3\.\s*Bedeutung.*?:/gi, "<span class='heading'>3. Bedeutung</span>")
-    .replace(/4\.\s*achtung\.live-Empfehlung.*?:/gi, "<span class='heading'>4. achtung.live-Empfehlung</span>")
-    .replace(/5\.\s*Tipp.*?:/gi, "<span class='heading'>5. Tipp</span>")
-    .replace(/6\.\s*Quelle.*?:/gi, "<span class='heading'>6. Quelle</span>")
-    .replace(/(?:\[([^\]]+)\])\(([^)]+)\)/g, '<a href="$2" class="tooltip" target="_blank">$1<span class="tooltiptext">Klick für Quelle</span></a>')
-    .replace(/\n/g, "<br>");
-
-  return html;
+function displayError(message) {
+  const resultContainer = document.getElementById("result");
+  resultContainer.innerHTML = `<div class="error">${message}</div>`;
 }

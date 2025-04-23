@@ -2,139 +2,95 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>[achtung.live] Datenschutzanalyse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>achtung.live – Datenschutzanalyse</title>
   <style>
     body {
       font-family: "Arial", sans-serif;
-      background: #fff;
-      color: #002244;
       margin: 2rem;
+      background-color: #ffffff;
+      color: #1a1a1a;
       line-height: 1.6;
     }
-
-    textarea {
-      width: 100%;
-      height: 150px;
+    h1 {
+      color: #d60000;
+    }
+    label, select, textarea, button {
       font-size: 1rem;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .button {
-      background: #0052cc;
-      color: #fff;
-      padding: 0.8rem 1.4rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .button:hover {
-      background-color: #003f99;
-    }
-
-    .heading {
-      font-weight: bold;
-      color: #cc0000;
       display: block;
-      margin-top: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
     }
-
-    .tooltip {
-      position: relative;
-      color: #0052cc;
-      text-decoration: underline;
+    textarea {
+      height: 140px;
+      padding: 0.5rem;
     }
-
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 180px;
-      background-color: #f9f9f9;
-      color: #000;
-      text-align: center;
-      border: 1px solid #ddd;
-      padding: 5px;
-      border-radius: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%; 
-      left: 50%;
-      margin-left: -90px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-
     .consent {
       margin: 1rem 0;
     }
-
-    footer {
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    #loader {
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    #result a {
+      color: #0052cc;
+      text-decoration: underline;
+    }
+    .footer {
+      margin-top: 3rem;
       font-size: 0.9rem;
       color: #555;
-      border-top: 1px solid #ccc;
-      margin-top: 3rem;
+      border-top: 1px solid #ddd;
       padding-top: 1rem;
     }
-
-    .wcag-label {
-      background: #198754;
-      color: white;
+    .wcag-badge {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: inline-block;
+      background-color: #eef;
+      color: #003366;
       padding: 0.3rem 0.6rem;
       border-radius: 4px;
-      font-size: 0.8rem;
-      display: inline-block;
-      margin-top: 1rem;
-    }
-
-    @media (max-width: 768px) {
-      textarea {
-        height: 120px;
-      }
-
-      .button {
-        font-size: 0.9rem;
-      }
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live] Datenschutzanalyse</h1>
 
-  <label for="inputText">Geben Sie Ihren Text ein:</label>
-  <textarea id="inputText" placeholder="Text hier eingeben..."></textarea>
+  <h1>[achtung.live]</h1>
+  <p>Geben Sie hier Ihren Text zur Sicherheitsanalyse ein:</p>
+
+  <label for="languageSelect">Sprache auswählen:</label>
+  <select id="languageSelect">
+    <option value="DE" selected>Deutsch</option>
+    <option value="EN">English</option>
+    <option value="FR">Français</option>
+    <option value="ES">Español</option>
+    <option value="IT">Italiano</option>
+  </select>
+
+  <textarea id="textInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
 
   <div class="consent">
     <input type="checkbox" id="consentCheckbox" />
     <label for="consentCheckbox">
-      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß 
-      <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
+      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
     </label>
   </div>
 
-  <div style="text-align: center;">
-    <button class="button" onclick="startAnalysis()">🧠 Analyse starten</button>
+  <button onclick="startAnalysis()">🧠 Analyse starten</button>
+
+  <div id="loader" style="display:none;">Analyse läuft, bitte warten...</div>
+
+  <div id="result"></div>
+
+  <div class="footer">
+    <p>© 2025 achtung.live – DSGVO- & EU-AI-Act-konform</p>
+    <span class="wcag-badge">WCAG-konform geprüft ✅</span>
   </div>
-
-  <div id="loader" style="text-align: center; margin: 1rem; font-weight: bold;"></div>
-
-  <div id="responseBlock" style="display: none;">
-    <div id="analysis" style="margin-top: 2rem;"></div>
-  </div>
-
-  <div class="wcag-label">✅ WCAG-konform geprüft</div>
-
-  <footer>
-    Achtung.live – DSGVO- & EU-AI-Act-konform. <br />
-    Alle Analysen werden ausschließlich lokal verarbeitet.
-  </footer>
 
   <script src="script.js"></script>
 </body>
