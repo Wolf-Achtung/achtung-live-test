@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import openai
+from openai import OpenAI
 import re
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# 🔐 Setze deinen echten OpenAI API-Key hier
-openai.api_key = "DEIN_OPENAI_KEY"
+# 🔐 OpenAI-Client (API-Key wird automatisch aus Umgebungsvariable genutzt)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # 🔍 Kategorisierte Schlüsselwörter für dynamisches Prompt-Routing
 PROMPT_CATEGORIES = {
@@ -51,15 +52,15 @@ def choose_prompt(text):
             return PROMPTS[category]
     return PROMPTS["standard"]
 
-# 🤖 GPT-Call
+# 🤖 GPT-Kommunikation mit OpenAI v1
 def call_gpt(prompt, user_text):
     full_prompt = f"{prompt}\n\nText:\n{user_text}"
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": full_prompt}],
         temperature=0.3
     )
-    return response.choices[0].message["content"]
+    return response.choices[0].message.content
 
 # 🧠 Textanalyse-Ausgabe extrahieren & strukturieren
 def extract_structured_json(raw_text):
