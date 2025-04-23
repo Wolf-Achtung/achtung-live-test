@@ -17,14 +17,11 @@ EMOTIONAL_TRIGGERS = ["verletzt", "verloren", "traurig", "deprimiert", "Hilfe", 
 def analyze():
     data = request.get_json()
     text = data.get("text", "")
-    app.logger.info(f"📥 Text erhalten: {text[:100]}...")
-
     prompt = (
         "Du bist ein empathischer Datenschutz-Coach. Analysiere den Text und gib folgende strukturierte Antwort:\n"
         "**Erkannte Datenarten:**\n- ...\n\n**Datenschutz-Risiko:** 🔴 ...\n\n"
         "**achtung.live-Empfehlung:** ...\n**Tipp:** ...\n**Quelle:** ..."
     )
-
     gpt_response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": f"{prompt}\n\nText:\n{text}"}],
@@ -61,19 +58,15 @@ def analyze():
         "rewrite_offer": rewrite_suggestion
     })
 
-
 @app.route("/rewrite", methods=["POST"])
 def rewrite():
     data = request.get_json()
     original = data.get("text", "")
-
     prompt = (
         "Bitte formuliere diesen Text empathisch, anonymisiert und datenschutzkonform um, "
-        "ohne die emotionale Aussage zu verlieren. Vermeide personenbezogene oder zu intime Inhalte, "
-        "nutze einen schützenden, sensiblen Ton. Gib nur den neuen Text aus:\n\n"
+        "ohne die emotionale Aussage zu verlieren. Gib nur den neuen Text aus:\n\n"
         f"{original}"
     )
-
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
@@ -81,3 +74,17 @@ def rewrite():
     )
     new_text = response.choices[0].message.content.strip()
     return jsonify({ "rewritten": new_text })
+
+@app.route("/howto", methods=["GET"])
+def howto():
+    prompt = (
+        "Erstelle eine einfache Schritt-für-Schritt-Anleitung auf Deutsch für Laien, "
+        "wie man eine verschlüsselte E-Mail versendet. Gib am Ende sichere Dienste wie ProtonMail an."
+    )
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2
+    )
+    steps = response.choices[0].message.content.strip()
+    return jsonify({ "howto": steps })
