@@ -1,63 +1,56 @@
-async function startAnalysis() {
-  const input = document.getElementById("user-input").value;
-  const output = document.getElementById("output");
-  const loader = document.getElementById("loader");
+const loader = document.getElementById("loader");
+const responseBlock = document.getElementById("responseBlock");
+const analysisOutput = document.getElementById("analysis");
+const consentCheckbox = document.getElementById("consentCheckbox");
 
-  if (!input.trim()) {
-    output.innerHTML = "⚠️ Bitte geben Sie einen Text ein.";
+function startAnalysis() {
+  const inputText = document.getElementById("inputText").value.trim();
+
+  if (!consentCheckbox.checked) {
+    alert("Bitte stimmen Sie der Verarbeitung gemäß Datenschutzerklärung zu.");
     return;
   }
 
-  if (!document.getElementById("consentCheckbox").checked) {
-    output.innerHTML = "⚠️ Bitte stimmen Sie der Datenschutzerklärung zu.";
+  if (!inputText) {
+    alert("Bitte geben Sie einen Text ein.");
     return;
   }
 
   loader.innerText = "Analyse läuft, bitte warten...";
-  output.innerHTML = "";
+  responseBlock.style.display = "block";
+  analysisOutput.innerHTML = "";
 
-  try {
-    const response = await fetch("https://web-production-f8648.up.railway.app/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: input })
+  fetch("https://web-production-f8648.up.railway.app/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: inputText, language: "de" })
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      loader.innerText = "";
+      if (data.result) {
+        const parsed = parseGPTResponse(data.result);
+        analysisOutput.innerHTML = parsed;
+      } else {
+        analysisOutput.innerHTML = "❌ Fehler: " + data.error;
+      }
+    })
+    .catch((err) => {
+      loader.innerText = "";
+      analysisOutput.innerHTML = "❌ Fehler: " + err.message;
     });
-
-    const data = await response.json();
-    loader.innerText = "";
-    if (data.result) {
-      output.innerHTML = formatGPTOutput(data.result);
-    } else {
-      output.innerHTML = "❌ Fehler: Keine Antwort erhalten.";
-    }
-  } catch (error) {
-    loader.innerText = "";
-    output.innerHTML = "❌ Fehler: " + error.message;
-  }
 }
 
-function formatGPTOutput(text) {
-  const highlights = [
-    "1. Erkannte Datenarten",
-    "2. Datenschutz-Risiko",
-    "3. Bedeutung der gefundenen Elemente",
-    "4. achtung.live-Empfehlung",
-    "5. Tipp: 1 sinnvoller Rewrite-Vorschlag",
-    "6. Quelle",
-    "Emoji-Analyse",
-    "🌐 Linkprüfung"
-  ];
+function parseGPTResponse(response) {
+  let html = response
+    .replace(/1\.\s*Erkannte Datenarten/gi, "<span class='heading'>1. Erkannte Datenarten</span>")
+    .replace(/2\.\s*Datenschutz-Risiko.*?:/gi, "<span class='heading'>2. Datenschutz-Risiko</span>")
+    .replace(/3\.\s*Bedeutung.*?:/gi, "<span class='heading'>3. Bedeutung</span>")
+    .replace(/4\.\s*achtung\.live-Empfehlung.*?:/gi, "<span class='heading'>4. achtung.live-Empfehlung</span>")
+    .replace(/5\.\s*Tipp.*?:/gi, "<span class='heading'>5. Tipp</span>")
+    .replace(/6\.\s*Quelle.*?:/gi, "<span class='heading'>6. Quelle</span>")
+    .replace(/(?:\[([^\]]+)\])\(([^)]+)\)/g, '<a href="$2" class="tooltip" target="_blank">$1<span class="tooltiptext">Klick für Quelle</span></a>')
+    .replace(/\n/g, "<br>");
 
-  highlights.forEach(heading => {
-    const re = new RegExp(`(${heading})`, "g");
-    text = text.replace(re, `<span style="color: #cc0000; font-weight: bold;">$1</span>`);
-  });
-
-  return text.replace(/\n/g, "<br>");
-}
-
-function toggleButton() {
-  const checkbox = document.getElementById("consentCheckbox");
-  const button = document.getElementById("analyze-btn");
-  button.disabled = !checkbox.checked;
+  return html;
 }
