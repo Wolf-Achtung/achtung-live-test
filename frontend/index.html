@@ -3,96 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Datenschutzanalyse & Emojis – [achtung.live]</title>
+  <title>[achtung.live] – Datenschutzanalyse und Korrektur (inkl. Emojis)</title>
   <style>
     body {
-      font-family: "Arial", sans-serif;
-      background-color: #f7f9fb;
-      margin: 0;
-      padding: 1rem;
-      color: #003366;
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #fefefe;
+      color: #222;
     }
-    h1 { text-align: center; color: #b30000; }
     textarea {
       width: 100%;
-      height: 120px;
+      height: 8rem;
       padding: 0.8rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .box {
-      background: #ffffff;
-      padding: 1.2rem;
-      margin-top: 1rem;
-      border-left: 6px solid #b30000;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-    }
-    label, select {
-      font-weight: bold;
-      margin-top: 1rem;
-      display: block;
     }
     button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
       background-color: #0052cc;
       color: white;
-      padding: 0.8rem 1.2rem;
       border: none;
-      border-radius: 5px;
-      margin-top: 1rem;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 1rem;
+    }
+    .response-block {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f4f6fa;
+      border-left: 4px solid #0052cc;
+    }
+    .emoji-block {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 1rem;
+      margin-top: 1rem;
     }
     footer {
-      font-size: 0.85rem;
       margin-top: 3rem;
-      text-align: center;
+      font-size: 0.85rem;
       color: #666;
+      border-top: 1px solid #ccc;
+      padding-top: 1rem;
     }
-    footer a {
-      color: #0052cc;
-    }
-    .consent-block {
-      margin-top: 1rem;
-    }
-    .wcag-label {
-      font-size: 0.8rem;
-      margin-top: 1rem;
-      color: #007700;
+    #wcag-label {
+      float: right;
+      font-size: 0.85rem;
+      color: #006400;
     }
   </style>
 </head>
 <body>
-  <h1>[achtung.live] – Datenschutzanalyse inkl. Emojis 🛡️</h1>
 
-  <form id="form" onsubmit="startAnalysis(); return false;">
-    <textarea id="userInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
+<h1>[achtung.live] – Datenschutzanalyse</h1>
 
-    <label for="language">Sprache:</label>
-    <select id="language">
-      <option value="de">Deutsch</option>
-      <option value="en">English</option>
-      <option value="fr">Français</option>
-    </select>
+<label for="text-input">Ihr Text:</label><br>
+<textarea id="text-input" placeholder="Fügen Sie hier Ihren Text ein..."></textarea><br>
 
-    <div class="consent-block">
-      <input type="checkbox" id="consent" required>
-      <label for="consent">Ich stimme der Verarbeitung meiner Eingabe gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label>
-    </div>
+<label><input type="checkbox" id="consent" /> Ich stimme der Verarbeitung meiner Eingabe zur Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.</label><br>
 
-    <div style="text-align:center;">
-      <button type="submit">🧠 Analyse starten</button>
-    </div>
-  </form>
+<button onclick="startAnalysis()">🧠 Analyse starten</button>
 
-  <p id="loader" style="text-align:center; font-weight:bold; color:#777;"></p>
-  <div id="result"></div>
+<p id="loader" style="color: #888;"></p>
+<div id="output"></div>
 
-  <footer>
-    <p>🔐 DSGVO- &amp; <a href="https://artificialintelligenceact.eu/" target="_blank">EU AI Act</a>-konform</p>
-    <p class="wcag-label">♿ WCAG-konform geprüft</p>
-  </footer>
+<footer>
+  <span>&copy; 2025 achtung.live – DSGVO & EU-AI-Act konform</span>
+  <span id="wcag-label">✔️ WCAG geprüft</span>
+</footer>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
