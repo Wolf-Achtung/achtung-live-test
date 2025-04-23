@@ -1,17 +1,22 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import openai
 import re
 
 app = Flask(__name__)
+CORS(app)
 
+# 🔐 Setze deinen echten OpenAI API-Key hier
 openai.api_key = "DEIN_OPENAI_KEY"
 
+# 🔍 Kategorisierte Schlüsselwörter für dynamisches Prompt-Routing
 PROMPT_CATEGORIES = {
     "medizinisch": ["Diagnose", "Rezept", "Arzt", "Krankheit", "Therapie", "Medikament"],
     "finanziell": ["IBAN", "Kreditkarte", "Gehalt", "Bank", "Investition", "Schulden"],
     "emotional": ["Beziehung", "Depression", "Verlust", "Angst", "Trauma", "intim"]
 }
 
+# 📋 Prompt-Vorlagen
 PROMPTS = {
     "medizinisch": """Analysieren Sie den folgenden Text auf medizinisch sensible Informationen wie Krankheiten, Medikamente, Diagnosen oder Arztkontakte. Wenn Sie solche Inhalte finden, bieten Sie eine strukturierte Analyse:
 1. Erkannte Datenarten
@@ -39,14 +44,14 @@ PROMPTS = {
 5. Quelle."""
 }
 
-
+# 🔁 Auswahl der passenden Prompt-Vorlage
 def choose_prompt(text):
     for category, keywords in PROMPT_CATEGORIES.items():
         if any(kw.lower() in text.lower() for kw in keywords):
             return PROMPTS[category]
     return PROMPTS["standard"]
 
-
+# 🤖 GPT-Call
 def call_gpt(prompt, user_text):
     full_prompt = f"{prompt}\n\nText:\n{user_text}"
     response = openai.ChatCompletion.create(
@@ -56,9 +61,8 @@ def call_gpt(prompt, user_text):
     )
     return response.choices[0].message["content"]
 
-
+# 🧠 Textanalyse-Ausgabe extrahieren & strukturieren
 def extract_structured_json(raw_text):
-    # Simple regex-based extractor
     detected = re.findall(r"(?i)Erkannte Datenarten:?\s*(.+?)\n", raw_text)
     risk = re.findall(r"(?i)Datenschutz[- ]?Risiko:?\s*(🟢|🟡|🔴.*?)\n", raw_text)
     explanation = re.findall(r"(?i)achtung\.live-Empfehlung:?\s*(.+?)(?:\n|Tipp:)", raw_text, re.DOTALL)
@@ -73,7 +77,7 @@ def extract_structured_json(raw_text):
         "source": source[0].strip() if source else ""
     }
 
-
+# 🔐 Haupt-Endpunkt für Analyse
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
@@ -82,3 +86,8 @@ def analyze():
     gpt_response = call_gpt(prompt, user_text)
     structured = extract_structured_json(gpt_response)
     return jsonify(structured)
+
+# ✅ Startseite zum Test
+@app.route("/", methods=["GET"])
+def home():
+    return "achtung.live API ist aktiv"
