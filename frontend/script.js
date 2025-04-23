@@ -36,8 +36,8 @@ function startAnalysis() {
 }
 
 function formatGPTOutput(text) {
-  // Fett hervorheben
+  if (!text || typeof text !== "string") return "⚠️ Keine gültige Antwort erhalten.";
   return text
-    .replace(/(\*\*.*?\*\*)/g, "<strong style='color:#b80000;'>$1</strong>")
+    .replace(/\*\*(.*?)\*\*/g, "<strong style='color:#b80000;'>$1</strong>")
     .replace(/\n/g, "<br>");
 }
