@@ -1,0 +1,35 @@
+{
+  "IBAN": {
+    "media_type": "slideshow",
+    "title": "So schützt du deine Bankdaten",
+    "slides": ["/media/iban_step1.png", "/media/iban_step2.png", "/media/iban_step3.png"],
+    "buttons": [
+      {"label": "📩 Sichere E-Mail senden", "link": "https://proton.me/de/mail"},
+      {"label": "📦 Dateien verschlüsseln (ZIP)", "link": "https://mobilsicher.de/ratgeber/so-verschluesseln-sie-dateien-auf-ihrem-computer"}
+    ]
+  },
+  "Medikament": {
+    "media_type": "slideshow",
+    "title": "Medizinische Informationen sicher teilen",
+    "slides": ["/media/medikament_1.png", "/media/medikament_2.png"],
+    "buttons": [
+      {"label": "👩‍⚕️ Anleitung: Gesundheitsdaten schützen", "link": "https://mobilsicher.de/ratgeber/gesundheitsdaten-richtig-schuetzen"}
+    ]
+  },
+  "Diagnose": {
+    "media_type": "slideshow",
+    "title": "So gehst du sicher mit Diagnosen um",
+    "slides": ["/media/diagnose_1.png", "/media/diagnose_2.png"],
+    "buttons": [
+      {"label": "👩‍⚕️ Gesundheitsdaten sicher weitergeben", "link": "https://www.patienten-information.de/"}
+    ]
+  },
+  "Trauma": {
+    "media_type": "slideshow",
+    "title": "Vertraulich mit emotionalen Inhalten umgehen",
+    "slides": ["/media/trauma_1.png", "/media/trauma_2.png"],
+    "buttons": [
+      {"label": "🛡️ Diskrete Hilfe finden", "link": "https://www.telefonseelsorge.de/"}
+    ]
+  }
+}
