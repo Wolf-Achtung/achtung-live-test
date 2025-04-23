@@ -47,3 +47,14 @@
   text-decoration: none;
   font-weight: bold;
 }
+
+.howto-box {
+  background: #f0f7ff;
+  border-left: 4px solid #2196f3;
+  padding: 1rem;
+  margin-top: 1rem;
+  white-space: pre-wrap;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.95rem;
+}

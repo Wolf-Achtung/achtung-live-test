@@ -26,7 +26,13 @@ async function startAnalysis() {
     html += `<div class="empathy-box">${data.empathy_message}</div>`;
   }
   if (data.rewrite_offer) {
-    html += `<div class="rewrite-box"><button onclick="triggerRewrite()">🤖 Ja, bitte umformulieren</button></div>`;
+    html += `
+      <div class="rewrite-box">
+        <button onclick="triggerRewrite()">🤖 Text schützen</button>
+        <button onclick="loadHowTo()">📩 Anleitung: Sicher senden</button>
+      </div>
+      <div id="howto-output" class="howto-box"></div>
+    `;
   }
 
   resultContainer.innerHTML = html;
@@ -42,3 +48,12 @@ async function triggerRewrite() {
   const data = await result.json();
   alert("🔐 Vorschlag für sicheren Text:\n\n" + data.rewritten);
 }
+
+async function loadHowTo() {
+  const output = document.getElementById("howto-output");
+  output.innerHTML = "⏳ Anleitung wird geladen…";
+  const res = await fetch("https://web-production-f8648.up.railway.app/howto");
+  const data = await res.json();
+  output.innerHTML = `<pre>${data.howto}</pre>`;
+}
+
