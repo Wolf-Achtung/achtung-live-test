@@ -4,108 +4,83 @@ from openai import OpenAI
 import os
 import json
 import logging
-import re
-import requests
+
+# Logging aktivieren
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 CORS(app)
 
-# Setup logging
-logging.basicConfig(level=logging.DEBUG)
-
-# OpenAI initialisieren
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Lade Emoji-Datenbank
+# Emoji-DB laden
 with open("emojiDatabase.json", "r", encoding="utf-8") as f:
-    emoji_db = json.load(f)
+    try:
+        emoji_db = json.load(f)
+    except Exception as e:
+        logging.error(f"❌ Fehler beim Laden der emojiDatabase: {e}")
+        emoji_db = []
 
-# Lade trusted_links.json
-try:
-    with open("trusted_links.json", "r", encoding="utf-8") as f:
+# Trusted Links laden
+with open("trusted_links.json", "r", encoding="utf-8") as f:
+    try:
         trusted_links = json.load(f)
-    logging.info(f"✅ {len(trusted_links)} vertrauenswürdige Links geladen.")
-except Exception as e:
-    trusted_links = []
-    logging.warning(f"⚠️ trusted_links.json konnte nicht geladen werden: {e}")
-
-# Linkprüfung
-def check_links_in_text(text):
-    found_links = re.findall(r'(https?://[^\s]+)', text)
-    checked_links = []
-    for link in found_links:
-        try:
-            resp = requests.head(link, allow_redirects=True, timeout=3)
-            if resp.status_code == 200:
-                checked_links.append(f"✅ Link erreichbar: <a href='{link}' target='_blank'>{link}</a>")
-            else:
-                checked_links.append(f"❌ Link nicht erreichbar: {link}")
-        except Exception:
-            checked_links.append(f"❌ Link nicht erreichbar: {link}")
-    return checked_links
+    except Exception as e:
+        logging.error(f"❌ trusted_links.json konnte nicht geladen werden: {e}")
+        trusted_links = []
 
 def get_emoji_info(text):
     found = []
     for emoji in emoji_db:
-        if emoji["symbol"] in text:
-            found.append(f"{emoji['symbol']}: {emoji['bedeutung']} ([Quelle]({emoji['quelle']}))")
+        if isinstance(emoji, dict) and emoji.get("symbol") in text:
+            bedeutung = emoji.get("bedeutung", "Unbekannt")
+            quelle = emoji.get("quelle", "#")
+            found.append(f"{emoji['symbol']}: {bedeutung} ([Quelle]({quelle}))")
     return found
+
+def get_link_for_topic(topic):
+    for item in trusted_links:
+        if isinstance(item, dict) and topic.lower() in item.get("name", "").lower():
+            return item.get("url", None)
+    return None
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
+    data = request.json
+    user_input = data.get("text", "")
+
+    logging.info(f"🔍 Analyse gestartet für Text: {user_input}")
+
     try:
-        data = request.json
-        user_input = data.get("text", "")
-        lang = data.get("lang", "de")
-
-        if not user_input.strip():
-            return jsonify({"error": "Kein Text übermittelt."}), 400
-
+        emoji_info = get_emoji_info(user_input)
+        themen_link = get_link_for_topic("Datenschutz")
         prompt = f"""
-Du bist ein Datenschutz- und Kommunikationsberater. Analysiere den folgenden Text aus Sicht der Privatsphäre, Datensicherheit und öffentlicher Wirkung.
-
-Antworte in der Sprache: {lang.upper()}.
-
-1. **Erkannte Datenarten**
-Liste alle potenziell sensiblen oder identifizierenden Informationen im Text auf.
-
-2. **Datenschutz-Risiko**
-Bewerte das Risiko (Ampel: 🟢, 🟡, 🔴).
-
-3. **Bedeutung der gefundenen Elemente**
-Erkläre, warum diese Informationen kritisch oder sensibel sein könnten.
-
-4. **achtung.live-Empfehlung (empathisch & konkret)**
-Gib eine klare, freundliche Handlungsempfehlung.
-
-5. **Tipp: 1 sinnvoller Rewrite-Vorschlag**
-Formuliere den Text so um, dass er datensicher ist, aber die Aussage erhalten bleibt.
-
-6. **Quelle (nur wenn relevant)**
-Empfehle vertrauenswürdige Links, um sich zum Thema weiter zu informieren.
+Analysiere den folgenden Text auf Datenschutzrisiken, politische Aussagen und versteckte Emoji-Codes.
+Gib folgende Abschnitte aus:
+1. Erkannte Datenarten
+2. Datenschutz-Risiko (Ampel: 🟢, 🟡, 🔴)
+3. Bedeutung der gefundenen Elemente
+4. achtung.live-Empfehlung (empathisch & konkret)
+5. Tipp: 1 sinnvoller Rewrite-Vorschlag
+6. Quelle (nur wenn relevant)
 
 Text:
-{user_input}
+\"\"\"{user_input}\"\"\"
+
+Emoji-Analyse:
+{', '.join(emoji_info) if emoji_info else "Keine Emojis erkannt."}
+
+Quelle: {themen_link or 'Nicht verfügbar'}
 """
 
-        logging.debug("🔍 Prompt sent to GPT-4")
-        response = client.chat.completions.create(
+        completion = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}]
         )
-        gpt_output = response.choices[0].message.content.strip()
 
-        # Linkprüfung & Emoji-Ergänzung
-        link_results = check_links_in_text(gpt_output)
-        emoji_info = get_emoji_info(user_input)
+        result = completion.choices[0].message.content
+        return jsonify({"result": result})
 
-        final_output = gpt_output
-        if emoji_info:
-            final_output += "\n\n🧩 Emoji-Analyse:\n" + "\n".join(emoji_info)
-        if link_results:
-            final_output += "\n\n🌐 Linkprüfung:\n" + "\n".join(link_results)
-
-        return jsonify({"result": final_output})
     except Exception as e:
-        logging.exception("❌ Fehler in /analyze")
+        logging.error(f"❌ Fehler bei Analyse: {e}")
         return jsonify({"error": str(e)}), 500
