@@ -5,82 +5,72 @@ import os
 import json
 import logging
 
-# Logging aktivieren
-logging.basicConfig(level=logging.DEBUG)
-
+# Initialisierung
 app = Flask(__name__)
 CORS(app)
+logging.basicConfig(level=logging.INFO)
 
+# OpenAI Client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Emoji-DB laden
-with open("emojiDatabase.json", "r", encoding="utf-8") as f:
-    try:
-        emoji_db = json.load(f)
-    except Exception as e:
-        logging.error(f"❌ Fehler beim Laden der emojiDatabase: {e}")
-        emoji_db = []
-
 # Trusted Links laden
-with open("trusted_links.json", "r", encoding="utf-8") as f:
-    try:
+try:
+    with open("trusted_links.json", "r", encoding="utf-8") as f:
         trusted_links = json.load(f)
-    except Exception as e:
-        logging.error(f"❌ trusted_links.json konnte nicht geladen werden: {e}")
-        trusted_links = []
+    logging.info(f"✅ {len(trusted_links)} vertrauenswürdige Links geladen.")
+except Exception as e:
+    trusted_links = {}
+    logging.warning(f"⚠️ trusted_links.json konnte nicht geladen werden: {e}")
 
-def get_emoji_info(text):
-    found = []
-    for emoji in emoji_db:
-        if isinstance(emoji, dict) and emoji.get("symbol") in text:
-            bedeutung = emoji.get("bedeutung", "Unbekannt")
-            quelle = emoji.get("quelle", "#")
-            found.append(f"{emoji['symbol']}: {bedeutung} ([Quelle]({quelle}))")
-    return found
+# Funktion zur Auswahl eines passenden Links
+def get_context_link(keywords):
+    for keyword in keywords:
+        if keyword in trusted_links:
+            return f"[{trusted_links[keyword]['label']}]({trusted_links[keyword]['url']})"
+    if "allgemein" in trusted_links:
+        return f"[{trusted_links['allgemein']['label']}]({trusted_links['allgemein']['url']})"
+    return "❌ Keine verlässliche Quelle verfügbar."
 
-def get_link_for_topic(topic):
-    for item in trusted_links:
-        if isinstance(item, dict) and topic.lower() in item.get("name", "").lower():
-            return item.get("url", None)
-    return None
-
+# Flask-Endpunkt
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.json
-    user_input = data.get("text", "")
-
-    logging.info(f"🔍 Analyse gestartet für Text: {user_input}")
-
     try:
-        emoji_info = get_emoji_info(user_input)
-        themen_link = get_link_for_topic("Datenschutz")
+        data = request.json
+        user_input = data.get("text", "")
+        language = data.get("language", "de")
+
+        if not user_input:
+            return jsonify({"error": "Kein Text übermittelt."}), 400
+
+        # Prompt mit Platzhalter für Quelle
         prompt = f"""
-Analysiere den folgenden Text auf Datenschutzrisiken, politische Aussagen und versteckte Emoji-Codes.
-Gib folgende Abschnitte aus:
+Du bist ein Datenschutz- und Kommunikations-Experte. Analysiere folgenden Text in Bezug auf Datenschutzrisiken und formuliere Empfehlungen in folgender Struktur:
+
 1. Erkannte Datenarten
 2. Datenschutz-Risiko (Ampel: 🟢, 🟡, 🔴)
-3. Bedeutung der gefundenen Elemente
-4. achtung.live-Empfehlung (empathisch & konkret)
-5. Tipp: 1 sinnvoller Rewrite-Vorschlag
-6. Quelle (nur wenn relevant)
+3. Bedeutung der gefundenen Elemente (nur wenn relevant)
+4. achtung.live-Empfehlung:
+5. Tipp:
+6. Quelle (nur wenn relevant): {get_context_link(['gesundheitsdaten', 'kreditkartendaten', 'emojis', 'persoenliche_daten', 'politische_meinung'])}
 
-Text:
-\"\"\"{user_input}\"\"\"
+Text: {user_input}
 
-Emoji-Analyse:
-{', '.join(emoji_info) if emoji_info else "Keine Emojis erkannt."}
-
-Quelle: {themen_link or 'Nicht verfügbar'}
+Sprache: {language}
 """
 
-        completion = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
         )
 
-        result = completion.choices[0].message.content
+        result = response.choices[0].message.content
         return jsonify({"result": result})
 
     except Exception as e:
-        logging.error(f"❌ Fehler bei Analyse: {e}")
+        logging.error(f"❌ Fehler: {e}")
         return jsonify({"error": str(e)}), 500
+
+# Startpunkt für lokale Tests
+if __name__ == "__main__":
+    app.run(debug=True)
