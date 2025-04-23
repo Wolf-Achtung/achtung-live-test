@@ -5,72 +5,69 @@ import os
 import json
 import logging
 
-# Initialisierung
 app = Flask(__name__)
 CORS(app)
-logging.basicConfig(level=logging.INFO)
 
-# OpenAI Client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Trusted Links laden
 try:
     with open("trusted_links.json", "r", encoding="utf-8") as f:
         trusted_links = json.load(f)
-    logging.info(f"✅ {len(trusted_links)} vertrauenswürdige Links geladen.")
+        print(f"✅ {len(trusted_links)} vertrauenswürdige Links geladen.")
 except Exception as e:
-    trusted_links = {}
-    logging.warning(f"⚠️ trusted_links.json konnte nicht geladen werden: {e}")
+    trusted_links = []
+    print("⚠️ trusted_links.json konnte nicht geladen werden:", e)
 
-# Funktion zur Auswahl eines passenden Links
-def get_context_link(keywords):
-    for keyword in keywords:
-        if keyword in trusted_links:
-            return f"[{trusted_links[keyword]['label']}]({trusted_links[keyword]['url']})"
-    if "allgemein" in trusted_links:
-        return f"[{trusted_links['allgemein']['label']}]({trusted_links['allgemein']['url']})"
-    return "❌ Keine verlässliche Quelle verfügbar."
+# Logging aktivieren
+logging.basicConfig(level=logging.DEBUG)
 
-# Flask-Endpunkt
 @app.route("/analyze", methods=["POST"])
-def analyze():
-    try:
-        data = request.json
-        user_input = data.get("text", "")
-        language = data.get("language", "de")
+def analyze_text():
+    data = request.json
+    input_text = data.get("text", "")
+    language = data.get("language", "de")
 
-        if not user_input:
-            return jsonify({"error": "Kein Text übermittelt."}), 400
+    if not input_text:
+        return jsonify({"error": "Textfeld ist leer."}), 400
 
-        # Prompt mit Platzhalter für Quelle
-        prompt = f"""
-Du bist ein Datenschutz- und Kommunikations-Experte. Analysiere folgenden Text in Bezug auf Datenschutzrisiken und formuliere Empfehlungen in folgender Struktur:
+    prompt = f"""
+Analysieren Sie folgenden Text auf Datenschutzrisiken, Emoji-Symbolik und rechtliche Fallstricke:
+"{input_text}"
 
+Antwortstruktur:
 1. Erkannte Datenarten
 2. Datenschutz-Risiko (Ampel: 🟢, 🟡, 🔴)
-3. Bedeutung der gefundenen Elemente (nur wenn relevant)
-4. achtung.live-Empfehlung:
-5. Tipp:
-6. Quelle (nur wenn relevant): {get_context_link(['gesundheitsdaten', 'kreditkartendaten', 'emojis', 'persoenliche_daten', 'politische_meinung'])}
+3. Bedeutung der gefundenen Elemente
+4. achtung.live-Empfehlung
+5. Tipp: Rewrite-Vorschlag oder sichere Handlungsalternative
+6. Quelle (nur wenn relevant)
 
-Text: {user_input}
-
-Sprache: {language}
+Nutzen Sie klare, verständliche Sprache.
 """
 
+    try:
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
 
-        result = response.choices[0].message.content
-        return jsonify({"result": result})
+        # 🛠 JSON-Safe-Access: response.choices[0].message.content
+        content = None
+        if hasattr(response, "choices") and isinstance(response.choices, list):
+            choice = response.choices[0]
+            if hasattr(choice, "message") and hasattr(choice.message, "content"):
+                content = choice.message.content
+
+        if not content:
+            raise ValueError("GPT-Antwort nicht lesbar oder leer.")
+
+        return jsonify({"result": content})
 
     except Exception as e:
-        logging.error(f"❌ Fehler: {e}")
+        logging.error(f"❌ GPT-Fehler: {e}")
         return jsonify({"error": str(e)}), 500
 
-# Startpunkt für lokale Tests
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,46 +1,42 @@
-{
-  "allgemein": [
-    {
-      "name": "Datenschutz.org",
-      "url": "https://www.datenschutz.org"
-    },
-    {
-      "name": "Bundesamt für Sicherheit in der Informationstechnik (BSI)",
-      "url": "https://www.bsi.bund.de"
-    }
-  ],
-  "kreditkarten": [
-    {
-      "name": "BSI – Sicher online zahlen",
-      "url": "https://www.bsi.bund.de/DE/Themen/Verbraucherinnen-und-Verbraucher/Informationen-und-Empfehlungen/Sicher-Online-Zahlen/sicher-online-zahlen_node.html"
-    }
-  ],
-  "gesundheit": [
-    {
-      "name": "Datenschutzzentrum – Gesundheit",
-      "url": "https://www.datenschutzzentrum.de/artikel/142-.html"
-    }
-  ],
-  "politik": [
-    {
-      "name": "netzpolitik.org – Meinungsfreiheit & Datenschutz",
-      "url": "https://netzpolitik.org"
-    }
-  ],
-  "emojis": [
-    {
-      "name": "Campact – Emoji-Codes",
-      "url": "https://blog.campact.de/2024/03/geheime-codes-von-rechtsextremen-online-emoji-hashtag/"
-    }
-  ],
-  "rechtliches": [
-    {
-      "name": "BfDI – Der Bundesbeauftragte für den Datenschutz",
-      "url": "https://www.bfdi.bund.de"
-    },
-    {
-      "name": "LDI NRW – Landesdatenschutz",
-      "url": "https://www.ldi.nrw.de"
-    }
-  ]
-}
+[
+  {
+    "kategorie": "Datenschutz allgemein",
+    "beschreibung": "Grundlagen des Datenschutzes in Europa",
+    "quelle": "https://www.bfdi.bund.de/DE/Datenschutz/datenschutz-node.html"
+  },
+  {
+    "kategorie": "Gesundheitsdaten",
+    "beschreibung": "Datenschutz im Gesundheitswesen laut DSGVO",
+    "quelle": "https://www.patientenrechte-datenschutz.de/datenschutz-im-gesundheitswesen/"
+  },
+  {
+    "kategorie": "Finanzdaten",
+    "beschreibung": "Wie Sie Ihre Kreditkartendaten sicher schützen",
+    "quelle": "https://www.verbraucherzentrale.de/wissen/geld-versicherungen/banken-und-konten/sicherheit-beim-onlinebanking-und-kartenzahlung-5123"
+  },
+  {
+    "kategorie": "Rechtsextreme Emoji-Codes",
+    "beschreibung": "Campact erklärt politische Emoji-Symbolik",
+    "quelle": "https://blog.campact.de/2024/03/geheime-codes-von-rechtsextremen-online-emoji-hashtag/"
+  },
+  {
+    "kategorie": "Emoji-Bedeutung",
+    "beschreibung": "Offizielle Emoji-Beschreibungen & Kontext",
+    "quelle": "https://emojipedia.org"
+  },
+  {
+    "kategorie": "Phishing & Spam",
+    "beschreibung": "Wie man gefälschte Webseiten erkennt",
+    "quelle": "https://www.bsi.bund.de/DE/Themen/Verbraucherinnen-und-Verbraucher/Informationen-und-Warnungen/Phishing/phishing_node.html"
+  },
+  {
+    "kategorie": "EU AI Act",
+    "beschreibung": "Was regelt der neue EU AI Act?",
+    "quelle": "https://digital-strategy.ec.europa.eu/en/policies/european-approach-artificial-intelligence"
+  },
+  {
+    "kategorie": "Soziale Medien",
+    "beschreibung": "Datenschutz bei WhatsApp, Facebook & Co.",
+    "quelle": "https://www.klicksafe.de/themen/datenschutz/"
+  }
+]
