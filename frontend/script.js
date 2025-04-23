@@ -1,49 +1,76 @@
-const backendURL = "https://web-production-f8648.up.railway.app/analyze";
+const backendUrl = "https://web-production-f8648.up.railway.app/analyze";
 
+const textarea = document.getElementById("userText");
+const loader = document.getElementById("loader");
+const resultDiv = document.getElementById("result");
+const consentCheckbox = document.getElementById("consentCheckbox");
+
+// Tooltip bei Mouseover für Quellen
+function showTooltip(text, event) {
+  const tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = text;
+  tooltip.style.display = "block";
+  tooltip.style.top = event.pageY + 15 + "px";
+  tooltip.style.left = event.pageX + 15 + "px";
+}
+
+function hideTooltip() {
+  document.getElementById("tooltip").style.display = "none";
+}
+
+// Analyse starten
 async function startAnalysis() {
-  const input = document.getElementById("text-input").value;
-  const consent = document.getElementById("consent").checked;
-  const loader = document.getElementById("loader");
-  const output = document.getElementById("output");
-  output.innerHTML = "";
+  const text = textarea.value.trim();
 
-  if (!consent) {
-    output.innerHTML = "<p style='color:red;'>❌ Bitte Zustimmung zur Analyse erteilen.</p>";
+  // Consent prüfen
+  if (!consentCheckbox.checked) {
+    resultDiv.innerHTML = "⚠️ Bitte stimmen Sie der Verarbeitung gemäß Datenschutzerklärung zu.";
+    return;
+  }
+
+  if (text.length === 0) {
+    resultDiv.innerHTML = "Bitte geben Sie einen Text ein.";
     return;
   }
 
   loader.innerText = "Analyse läuft, bitte warten...";
+  resultDiv.innerHTML = "";
 
   try {
-    const res = await fetch(backendURL, {
+    const response = await fetch(backendUrl, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ text: input })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ text: text })
     });
 
-    const data = await res.json();
+    const data = await response.json();
+
     loader.innerText = "";
 
-    if (data.error) {
-      output.innerHTML = `<p style="color:red;">❌ Fehler: ${data.error}</p>`;
-      return;
-    }
+    console.log("Antwort vom Backend:", data);
 
-    let html = `<div class="response-block">${data.feedback.replace(/\n/g, "<br>")}</div>`;
+    if (data.result) {
+      let formatted = data.result.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+      resultDiv.innerHTML = formatted;
 
-    if (data.emoji_analysis && data.emoji_analysis.length > 0) {
-      html += `<div class="emoji-block"><strong>🧩 Emoji-Analyse:</strong><ul>`;
-      data.emoji_analysis.forEach(e => {
-        html += `<li><strong>${e.title} (${e.symbol})</strong><br>${e.text}
-        <br><small>Kontext: ${e.group}</small><br>
-        <a href="${e.link}" target="_blank" rel="noopener noreferrer">🔗 Quelle</a></li><br>`;
+      // Tooltips nachträglich aktivieren
+      const sourceLinks = resultDiv.querySelectorAll(".source-tooltip");
+      sourceLinks.forEach(link => {
+        link.addEventListener("mouseover", (e) => showTooltip(link.getAttribute("data-tooltip"), e));
+        link.addEventListener("mouseout", hideTooltip);
       });
-      html += `</ul></div>`;
+
+    } else if (data.error) {
+      resultDiv.innerHTML = `❌ Fehler: ${data.error}`;
+    } else {
+      resultDiv.innerHTML = "⚠️ Keine Vorschläge gefunden.<br><br>GPT-Rohantwort: Keine Antwort erhalten";
     }
 
-    output.innerHTML = html;
-  } catch (err) {
+  } catch (error) {
+    console.error("Fehler beim Abrufen:", error);
     loader.innerText = "";
-    output.innerHTML = `<p style="color:red;">❌ Fehler: ${err.message}</p>`;
+    resultDiv.innerHTML = `❌ Fehler: ${error.message}`;
   }
 }
