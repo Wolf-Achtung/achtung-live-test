@@ -7,26 +7,31 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- CI Header -->
   <header class="ci-header">
     <span class="logo-tag">achtung.live</span>
     <span class="tagline">Deine empathische Datenschutzberatung</span>
   </header>
 
+  <!-- Sprache & Textfeld -->
   <label for="language">Sprache auswählen:</label>
   <select id="language">
     <option value="de">Deutsch</option>
   </select>
 
   <textarea id="input-text" placeholder="Gib deinen Text hier ein…"></textarea>
-  <br />
+
   <label>
     <input type="checkbox" id="consent" />
     Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
-    <a href="#">Datenschutzerklärung</a> zu.
+    <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> zu.
   </label>
+
   <br />
   <input type="button" id="analyze-button" value="Sicherheit prüfen" />
 
+  <!-- Ausgaben: Ergebnisse, Shadow, Rewrite -->
   <div id="results" class="feedback-box"></div>
   <div id="empathy-message" class="empathy-box hidden"></div>
 
@@ -38,11 +43,13 @@
   <div id="rewrite-popup" class="modal-box hidden"></div>
   <div id="howto-box" class="howto-box hidden"></div>
 
+  <!-- Footer / DSGVO-Info -->
   <footer>
     <p>© 2025 achtung.live – DSGVO- & EU-AI-Act-konform</p>
     <p><span class="badge">WCAG-konform geprüft ✅</span></p>
   </footer>
 
+  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>

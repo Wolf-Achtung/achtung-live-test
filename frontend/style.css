@@ -1,9 +1,14 @@
+/* =======================
+   CI für statische Seiten
+   ======================= */
+
 :root {
   --ci-primary: #e91e63;     /* empathisches Pink */
   --ci-blue: #2196f3;        /* vertrauensvolles Blau */
   --ci-bg: #fff5f8;          /* zartes Rosé-Hintergrund */
   --ci-gray: #f6f6f6;
   --ci-text: #333;
+  --ci-red: #c30000;
 }
 
 body {
@@ -11,29 +16,66 @@ body {
   background: var(--ci-bg);
   color: var(--ci-text);
   padding: 2rem;
+  margin: 0;
 }
 
-.ci-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--ci-primary);
+/* STANDALONE CI-INFOS (z.B. /ki-hinweis) */
+body.ci-page {
+  text-align: center;
+  background: #ffffff;
+  padding: 4rem 2rem;
+}
+
+.ci-logo {
+  font-family: monospace;
+  color: var(--ci-red);
+  font-size: 2rem;
   margin-bottom: 2rem;
 }
 
-.logo-tag {
-  font-family: monospace;
+.ci-headline {
+  font-size: 1.5rem;
   font-weight: bold;
-  font-size: 1.2rem;
-  color: var(--ci-primary);
+  color: #0a1d3a;
+  margin-bottom: 1rem;
 }
 
-.tagline {
-  font-size: 0.95rem;
-  color: #777;
-  margin-top: 0.2rem;
+.ci-subtext {
+  font-size: 1rem;
+  color: #444;
+  max-width: 600px;
+  margin: 0 auto;
 }
+
+.ci-footer {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.ci-eu {
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+  color: #444;
+  line-height: 1.4;
+}
+
+.ci-links {
+  color: var(--ci-red);
+  font-weight: bold;
+}
+.ci-links a {
+  color: var(--ci-red);
+  text-decoration: none;
+  margin: 0 6px;
+}
+
+/* =====================
+   App-Interface Styling
+   ===================== */
 
 textarea {
   width: 100%;
@@ -45,7 +87,8 @@ textarea {
   margin-bottom: 1rem;
 }
 
-input[type="button"] {
+input[type="button"],
+button {
   background-color: var(--ci-primary);
   color: white;
   padding: 10px 16px;
@@ -55,7 +98,8 @@ input[type="button"] {
   font-weight: bold;
 }
 
-input[type="button"]:hover {
+input[type="button"]:hover,
+button:hover {
   background-color: #d81b60;
 }
 
@@ -124,6 +168,7 @@ footer {
   margin-top: 3rem;
   font-size: 0.85rem;
   color: #666;
+  text-align: center;
 }
 
 .badge {
