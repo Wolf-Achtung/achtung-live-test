@@ -1,59 +1,74 @@
-async function startAnalysis() {
-  const inputText = document.getElementById("textInput").value.trim();
-  if (!inputText) return alert("Bitte gib einen Text ein.");
+const analyzeButton = document.getElementById("analyze-button");
+const inputText = document.getElementById("input-text");
+const resultBox = document.getElementById("results");
+const rewriteButton = document.getElementById("rewrite-button");
+const rewritePopup = document.getElementById("rewrite-popup");
+const empathyBox = document.getElementById("empathy-message");
+const howtoButton = document.getElementById("howto-button");
+const howtoBox = document.getElementById("howto-box");
 
-  const resultContainer = document.getElementById("result");
-  resultContainer.innerHTML = "⏳ Analyse läuft…";
+analyzeButton.addEventListener("click", async () => {
+  const text = inputText.value;
+  const consent = document.getElementById("consent").checked;
 
-  const res = await fetch("https://web-production-f8648.up.railway.app/analyze", {
+  if (!text || !consent) {
+    alert("Bitte Text eingeben und der Analyse zustimmen.");
+    return;
+  }
+
+  resultBox.innerHTML = "⏳ Analyse läuft…";
+  empathyBox.classList.add("hidden");
+  rewriteButton.classList.add("hidden");
+  howtoButton.classList.add("hidden");
+
+  const response = await fetch("https://web-production-f8648.up.railway.app/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: inputText })
+    body: JSON.stringify({ text })
   });
 
-  const data = await res.json();
-  let html = `
-    <div class="feedback-box">
-      <p><strong>Erkannte Datenarten:</strong> ${data.detected_data}</p>
-      <p><strong>Datenschutz-Risiko:</strong> ${data.risk_level}</p>
-      <p><strong>achtung.live-Empfehlung:</strong> ${data.explanation}</p>
-      <p><strong>Tipp:</strong> ${data.tip}</p>
-      ${data.source ? `<p><strong>Quelle:</strong> <a href="${data.source}" target="_blank">${data.source}</a></p>` : ""}
-    </div>
+  const data = await response.json();
+
+  resultBox.innerHTML = `
+    <strong>Erkannte Datenarten:</strong> ${data.detected_data}<br />
+    <strong>Datenschutz-Risiko:</strong> ${data.risk_level}<br />
+    <strong>achtung.live-Empfehlung:</strong> ${data.explanation}<br />
+    <strong>Tipp:</strong> ${data.tip}<br />
+    ${data.source ? `<strong>Quelle:</strong> <a href="${data.source}" target="_blank">${data.source}</a>` : ""}
   `;
 
   if (data.empathy_message) {
-    html += `<div class="empathy-box ${data.empathy_level}">${data.empathy_message}</div>`;
+    empathyBox.className = `empathy-box ${data.empathy_level}`;
+    empathyBox.innerText = data.empathy_message;
+    empathyBox.classList.remove("hidden");
   }
 
-  if (data.risk_level !== "🟢 Kein Risiko") {
-    html += `
-      <div class="rewrite-box">
-        ${data.rewrite_offer ? `<button onclick="triggerRewrite()">🤖 Text schützen</button>` : ""}
-        <button onclick="loadHowTo()">📩 Anleitung: Sicher senden</button>
-      </div>
-      <div id="howto-output" class="howto-box"></div>
-    `;
+  if (data.rewrite_offer) {
+    rewriteButton.classList.remove("hidden");
+    howtoButton.classList.remove("hidden");
   }
+});
 
-  resultContainer.innerHTML = html;
-}
+rewriteButton.addEventListener("click", async () => {
+  const text = inputText.value;
+  rewritePopup.innerText = "⏳ Vorschlag wird erstellt…";
+  rewritePopup.classList.remove("hidden");
 
-async function triggerRewrite() {
-  const inputText = document.getElementById("textInput").value.trim();
-  const result = await fetch("https://web-production-f8648.up.railway.app/rewrite", {
+  const response = await fetch("https://web-production-f8648.up.railway.app/rewrite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: inputText })
+    body: JSON.stringify({ text })
   });
-  const data = await result.json();
-  alert("🔐 Vorschlag für sicheren Text:\n\n" + data.rewritten);
-}
 
-async function loadHowTo() {
-  const output = document.getElementById("howto-output");
-  output.innerHTML = "⏳ Anleitung wird geladen…";
-  const res = await fetch("https://web-production-f8648.up.railway.app/howto");
-  const data = await res.json();
-  output.innerHTML = `<pre>${data.howto}</pre>`;
-}
+  const data = await response.json();
+  rewritePopup.innerText = "Vorschlag für sicheren Text:\n\n" + data.rewritten;
+});
+
+howtoButton.addEventListener("click", async () => {
+  howtoBox.classList.remove("hidden");
+  howtoBox.innerText = "⏳ Anleitung wird geladen…";
+
+  const response = await fetch("https://web-production-f8648.up.railway.app/howto");
+  const data = await response.json();
+  howtoBox.innerText = data.howto;
+});

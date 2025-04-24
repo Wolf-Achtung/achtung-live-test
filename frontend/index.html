@@ -3,94 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>achtung.live – Datenschutzanalyse</title>
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      margin: 2rem;
-      background-color: #ffffff;
-      color: #1a1a1a;
-      line-height: 1.6;
-    }
-    h1 {
-      color: #d60000;
-    }
-    label, select, textarea, button {
-      font-size: 1rem;
-      display: block;
-      margin-bottom: 1rem;
-      width: 100%;
-    }
-    textarea {
-      height: 140px;
-      padding: 0.5rem;
-    }
-    .consent {
-      margin: 1rem 0;
-    }
-    .error {
-      color: red;
-      font-weight: bold;
-    }
-    #loader {
-      font-style: italic;
-      margin-bottom: 1rem;
-    }
-    #result a {
-      color: #0052cc;
-      text-decoration: underline;
-    }
-    .footer {
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      color: #555;
-      border-top: 1px solid #ddd;
-      padding-top: 1rem;
-    }
-    .wcag-badge {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      display: inline-block;
-      background-color: #eef;
-      color: #003366;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-    }
-  </style>
+  <title>achtung.live – Deine empathische Sicherheitsberatung</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header class="ci-header">
+    <span class="logo-tag">achtung.live</span>
+    <span class="tagline">Deine empathische Datenschutzberatung</span>
+  </header>
 
-  <h1>[achtung.live]</h1>
-  <p>Geben Sie hier Ihren Text zur Sicherheitsanalyse ein:</p>
-
-  <label for="languageSelect">Sprache auswählen:</label>
-  <select id="languageSelect">
-    <option value="DE" selected>Deutsch</option>
-    <option value="EN">English</option>
-    <option value="FR">Français</option>
-    <option value="ES">Español</option>
-    <option value="IT">Italiano</option>
+  <label for="language">Sprache auswählen:</label>
+  <select id="language">
+    <option value="de">Deutsch</option>
   </select>
 
-  <textarea id="textInput" placeholder="Geben Sie hier Ihren Text ein..."></textarea>
+  <textarea id="input-text" placeholder="Gib deinen Text hier ein…"></textarea>
+  <br />
+  <label>
+    <input type="checkbox" id="consent" />
+    Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß
+    <a href="#">Datenschutzerklärung</a> zu.
+  </label>
+  <br />
+  <input type="button" id="analyze-button" value="Sicherheit prüfen" />
 
-  <div class="consent">
-    <input type="checkbox" id="consentCheckbox" />
-    <label for="consentCheckbox">
-      Ich stimme der Verarbeitung meiner Eingabe zum Zweck der Analyse gemäß <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu.
-    </label>
+  <div id="results" class="feedback-box"></div>
+  <div id="empathy-message" class="empathy-box hidden"></div>
+
+  <div class="rewrite-box">
+    <button id="rewrite-button" class="hidden">Sicher umformulieren</button>
+    <button id="howto-button" class="hidden">Hilfe: Nachricht verschicken</button>
   </div>
 
-  <button onclick="startAnalysis()">🧠 Analyse starten</button>
+  <div id="rewrite-popup" class="modal-box hidden"></div>
+  <div id="howto-box" class="howto-box hidden"></div>
 
-  <div id="loader" style="display:none;">Analyse läuft, bitte warten...</div>
-
-  <div id="result"></div>
-
-  <div class="footer">
+  <footer>
     <p>© 2025 achtung.live – DSGVO- & EU-AI-Act-konform</p>
-    <span class="wcag-badge">WCAG-konform geprüft ✅</span>
-  </div>
+    <p><span class="badge">WCAG-konform geprüft ✅</span></p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
