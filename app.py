@@ -41,9 +41,9 @@ def analyze():
         "1. **Erkannte Datenarten** (z. B. Gesundheitsdaten, IBAN, psychische Belastung etc.)\n"
         "2. **Datenschutz-Risiko-Ampel**: Nutze nur 🟢 (kein Risiko), 🟡 (sensibel), 🔴 (kritisch). "
         "Setze 🔴, wenn mehrere sensible Daten kombiniert werden.\n"
-        "3. **achtung.live-Empfehlung**: Was sollte der Nutzer tun?\n"
-        "4. **Tipp**: Formuliere eine konkrete Hilfe.\n"
-        "5. **Quelle** (wenn relevant)\n\n"
+        "3. **achtung.live-Empfehlung:** Was sollte der Nutzer tun?\n"
+        "4. **Tipp:** Formuliere eine konkrete Hilfe.\n"
+        "5. **Quelle:** (wenn relevant)\n\n"
         "Antwortformat:\n"
         "**Erkannte Datenarten:** ...\n"
         "**Datenschutz-Risiko:** ...\n"
@@ -67,6 +67,17 @@ def analyze():
     source = re.findall(r"(?i)Quelle:?\s*(https?://\S+)", gpt_text)
 
     risk_level = risk[0].strip() if risk else "🟡 Unbekannt"
+
+    # 🔁 Fallback-Ampel bei Lücke
+    if risk_level == "🟡 Unbekannt":
+        critical_terms = ["gesundheit", "diagnose", "medikament", "iban", "konto", "adresse", "bank", "depression", "chef"]
+        if sum(1 for word in critical_terms if word in text.lower()) >= 2:
+            risk_level = "🔴 Kritisch"
+        elif any(word in text.lower() for word in critical_terms):
+            risk_level = "🟡 Sensibel"
+        else:
+            risk_level = "🟢 Kein Risiko"
+
     explanation_final = explanation[0].strip() if explanation else "Diese Info solltest du nur vertraulich teilen."
     tip_final = tip[0].strip() if tip else "Verwende sichere Methoden wie verschlüsselte E-Mail."
 
@@ -100,8 +111,9 @@ def rewrite():
     data = request.get_json()
     original = data.get("text", "")
     prompt = (
-        "Formuliere diesen Text empathisch, anonymisiert und datenschutzkonform um, "
-        "ohne die emotionale Aussage zu verlieren. Gib nur den neuen Text aus:\n\n"
+        "Formuliere diesen Text datenschutzkonform, empathisch und in einfacher Sprache um. "
+        "Die emotionale Aussage soll erhalten bleiben, der Inhalt aber neutralisiert und geschützt sein. "
+        "Vermeide Fachbegriffe und klinge nicht therapeutisch.\n\n"
         f"{original}"
     )
     response = client.chat.completions.create(
