@@ -39,12 +39,12 @@ def analyze():
         "Du bist ein einfühlsamer Datenschutz-Coach. Analysiere den folgenden Text in Bezug auf Datenschutz und emotionale Sensibilität. "
         "Identifiziere präzise:\n\n"
         "1. **Erkannte Datenarten** (z. B. Gesundheitsdaten, IBAN, psychische Belastung etc.)\n"
-        "2. **Datenschutz-Risiko-Ampel**: Nutze nur 🟢 (kein Risiko), 🟡 (sensibel), 🔴 (kritisch). "
-        "Setze 🔴, wenn mehrere sensible Daten kombiniert werden.\n"
+        "2. **Datenschutz-Risiko-Ampel**: Nur 🟢 (kein Risiko), 🟡 (sensibel), 🔴 (kritisch). "
+        "Setze 🔴, wenn mehrere sensible Inhalte kombiniert werden.\n"
         "3. **achtung.live-Empfehlung:** Was sollte der Nutzer tun?\n"
         "4. **Tipp:** Formuliere eine konkrete Hilfe.\n"
-        "5. **Quelle:** (wenn relevant)\n\n"
-        "Antwortformat:\n"
+        "5. **Quelle:** (wenn vorhanden)\n\n"
+        "Format:\n"
         "**Erkannte Datenarten:** ...\n"
         "**Datenschutz-Risiko:** ...\n"
         "**achtung.live-Empfehlung:** ...\n"
@@ -68,7 +68,7 @@ def analyze():
 
     risk_level = risk[0].strip() if risk else "🟡 Unbekannt"
 
-    # 🔁 Fallback-Ampel bei Lücke
+    # 🛡️ Fallback-Ampel: automatisch bewerten, falls GPT keine liefert
     if risk_level == "🟡 Unbekannt":
         critical_terms = ["gesundheit", "diagnose", "medikament", "iban", "konto", "adresse", "bank", "depression", "chef"]
         if sum(1 for word in critical_terms if word in text.lower()) >= 2:
@@ -86,13 +86,13 @@ def analyze():
     rewrite_suggestion = False
 
     if empathy_level == "hoch":
-        shadow_msg = "🆘 Du sprichst über Gesundheit, Frust und Finanzen – möchtest du den Text schützen?"
+        shadow_msg = "Du sprichst über Gesundheit, Frust und Finanzen – möchtest du deinen Text diskret umformulieren?"
         rewrite_suggestion = True
     elif empathy_level == "mittel":
-        shadow_msg = "🫂 Das klingt persönlich. Wir helfen dir beim sicheren Umschreiben."
+        shadow_msg = "Das klingt persönlich. Wir helfen dir beim sicheren Umschreiben."
         rewrite_suggestion = True
     elif empathy_level == "niedrig":
-        shadow_msg = "🔍 Möchtest du den Text in eine datensichere Form bringen?"
+        shadow_msg = "Möchtest du deinen Text in eine geschützte Form bringen?"
         rewrite_suggestion = True
 
     return jsonify({
@@ -112,8 +112,8 @@ def rewrite():
     original = data.get("text", "")
     prompt = (
         "Formuliere diesen Text datenschutzkonform, empathisch und in einfacher Sprache um. "
-        "Die emotionale Aussage soll erhalten bleiben, der Inhalt aber neutralisiert und geschützt sein. "
-        "Vermeide Fachbegriffe und klinge nicht therapeutisch.\n\n"
+        "Erhalte dabei die emotionale Aussage, aber schütze persönliche Inhalte durch Neutralität. "
+        "Kling nicht therapeutisch oder übertrieben formal.\n\n"
         f"{original}"
     )
     response = client.chat.completions.create(
@@ -127,7 +127,7 @@ def rewrite():
 def howto():
     prompt = (
         "Erstelle eine einfache Schritt-für-Schritt-Anleitung auf Deutsch für Laien, "
-        "wie man eine verschlüsselte E-Mail versendet. Gib sichere Dienste wie ProtonMail an."
+        "wie man eine verschlüsselte E-Mail versendet. Nutze Dienste wie ProtonMail oder Tutanota."
     )
     try:
         response = client.chat.completions.create(
@@ -140,11 +140,11 @@ def howto():
         print("GPT fallback active:", e)
         steps = (
             "So sendest du eine verschlüsselte E-Mail:\n"
-            "1. Besuche proton.me und erstelle ein kostenloses Konto\n"
-            "2. Verfasse deine Nachricht und klicke auf das Schloss-Symbol\n"
-            "3. Lege ein Passwort fest\n"
-            "4. Teile das Passwort separat, z. B. per SMS\n"
-            "5. Der Empfänger erhält einen sicheren Link"
+            "1. Erstelle ein kostenloses Konto bei proton.me oder tutanota.com\n"
+            "2. Verfasse deine Nachricht, klicke auf das Schloss-Symbol\n"
+            "3. Wähle ein Passwort – teile es getrennt mit der empfangenden Person\n"
+            "4. Der Empfänger bekommt einen sicheren Link\n"
+            "5. Optional: Lade Anhänge nur verschlüsselt hoch"
         )
 
     return jsonify({ "howto": steps })
