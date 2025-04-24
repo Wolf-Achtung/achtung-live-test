@@ -1,82 +1,39 @@
-/* =======================
-   CI für statische Seiten
-   ======================= */
-
 :root {
-  --ci-primary: #e91e63;     /* empathisches Pink */
-  --ci-blue: #2196f3;        /* vertrauensvolles Blau */
-  --ci-bg: #fff5f8;          /* zartes Rosé-Hintergrund */
+  --ci-primary: #c30000;
+  --ci-blue: #2196f3;
   --ci-gray: #f6f6f6;
-  --ci-text: #333;
-  --ci-red: #c30000;
+  --ci-text: #222;
+  --ci-bg: #ffffff;
 }
 
 body {
-  font-family: "Helvetica Neue", sans-serif;
   background: var(--ci-bg);
+  font-family: "Helvetica Neue", sans-serif;
   color: var(--ci-text);
   padding: 2rem;
   margin: 0;
 }
 
-/* STANDALONE CI-INFOS (z.B. /ki-hinweis) */
-body.ci-page {
+/* CI Header */
+.ci-header {
   text-align: center;
-  background: #ffffff;
-  padding: 4rem 2rem;
-}
-
-.ci-logo {
-  font-family: monospace;
-  color: var(--ci-red);
-  font-size: 2rem;
   margin-bottom: 2rem;
 }
 
-.ci-headline {
-  font-size: 1.5rem;
+.logo-tag {
+  font-family: monospace;
+  color: var(--ci-primary);
+  font-size: 2rem;
   font-weight: bold;
-  color: #0a1d3a;
-  margin-bottom: 1rem;
 }
 
-.ci-subtext {
+.tagline {
   font-size: 1rem;
   color: #444;
-  max-width: 600px;
-  margin: 0 auto;
+  margin-top: 0.3rem;
 }
 
-.ci-footer {
-  font-size: 0.85rem;
-  color: #555;
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-  text-align: center;
-}
-
-.ci-eu {
-  max-width: 700px;
-  margin: 0 auto 1rem auto;
-  color: #444;
-  line-height: 1.4;
-}
-
-.ci-links {
-  color: var(--ci-red);
-  font-weight: bold;
-}
-.ci-links a {
-  color: var(--ci-red);
-  text-decoration: none;
-  margin: 0 6px;
-}
-
-/* =====================
-   App-Interface Styling
-   ===================== */
-
+/* Formular */
 textarea {
   width: 100%;
   height: 150px;
@@ -100,9 +57,10 @@ button {
 
 input[type="button"]:hover,
 button:hover {
-  background-color: #d81b60;
+  background-color: #a00000;
 }
 
+/* Ergebnisse */
 .feedback-box {
   background: var(--ci-gray);
   padding: 1rem;
@@ -134,6 +92,7 @@ button:hover {
   border-left: 4px solid var(--ci-blue);
 }
 
+/* Rewrite + Howto */
 .rewrite-box {
   margin-top: 1rem;
 }
@@ -164,17 +123,16 @@ button:hover {
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
+/* Footer */
 footer {
-  margin-top: 3rem;
   font-size: 0.85rem;
-  color: #666;
-  text-align: center;
+  margin-top: 3rem;
+  color: #444;
+  text-align: left;
+  padding-left: 1rem;
 }
-
-.badge {
-  background: var(--ci-blue);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+footer a {
+  color: var(--ci-primary);
+  text-decoration: none;
+  font-weight: bold;
 }

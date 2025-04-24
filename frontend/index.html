@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>achtung.live – Deine empathische Sicherheitsberatung</title>
+  <title>achtung.live – Deine empathische Datenschutzberatung</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- CI Header -->
   <header class="ci-header">
-    <span class="logo-tag">achtung.live</span>
-    <span class="tagline">Deine empathische Datenschutzberatung</span>
+    <div class="logo-tag">[achtung.live]</div>
+    <div class="tagline">Deine empathische Datenschutzberatung</div>
   </header>
 
-  <!-- Sprache & Textfeld -->
+  <!-- Sprache & Text -->
   <label for="language">Sprache auswählen:</label>
   <select id="language">
     <option value="de">Deutsch</option>
@@ -31,10 +31,11 @@
   <br />
   <input type="button" id="analyze-button" value="Sicherheit prüfen" />
 
-  <!-- Ausgaben: Ergebnisse, Shadow, Rewrite -->
+  <!-- Ergebnis -->
   <div id="results" class="feedback-box"></div>
   <div id="empathy-message" class="empathy-box hidden"></div>
 
+  <!-- Rewrite/Howto -->
   <div class="rewrite-box">
     <button id="rewrite-button" class="hidden">Sicher umformulieren</button>
     <button id="howto-button" class="hidden">Hilfe: Nachricht verschicken</button>
@@ -43,13 +44,22 @@
   <div id="rewrite-popup" class="modal-box hidden"></div>
   <div id="howto-box" class="howto-box hidden"></div>
 
-  <!-- Footer / DSGVO-Info -->
+  <!-- Footer -->
   <footer>
-    <p>© 2025 achtung.live – DSGVO- & EU-AI-Act-konform</p>
-    <p><span class="badge">WCAG-konform geprüft ✅</span></p>
+    <p>
+      achtung.live ist keine KI von irgendwo. Wir entwickeln aus Europa – auf Basis europäischer Werte:
+      Datenschutz, Transparenz und digitale Selbstbestimmung. Das Tool ist vollständig DSGVO-konform,
+      speichert keine Inhalte und arbeitet mit einer klaren Mission: Menschen schützen, nicht überwachen.
+    </p>
+    <p>
+      <a href="/">Startseite</a> · 
+      <a href="/ki-hinweis">Wie funktioniert die KI?</a> · 
+      <a href="/datenschutz">Datenschutz</a> · 
+      <a href="/impressum">Impressum</a> · 
+      <a href="/kontakt">Kontakt</a>
+    </p>
   </footer>
 
-  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>
