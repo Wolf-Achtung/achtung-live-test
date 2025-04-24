@@ -36,19 +36,31 @@ def analyze():
     text = data.get("text", "")
 
     prompt = (
-        "Du bist ein empathischer Datenschutz-Coach. Analysiere den Text und gib folgende strukturierte Antwort:\n"
-        "**Erkannte Datenarten:**\n- ...\n\n**Datenschutz-Risiko:** 🔴 ...\n\n"
-        "**achtung.live-Empfehlung:** ...\n**Tipp:** ...\n**Quelle:** ..."
+        "Du bist ein einfühlsamer Datenschutz-Coach. Analysiere den folgenden Text in Bezug auf Datenschutz und emotionale Sensibilität. "
+        "Identifiziere präzise:\n\n"
+        "1. **Erkannte Datenarten** (z. B. Gesundheitsdaten, IBAN, psychische Belastung etc.)\n"
+        "2. **Datenschutz-Risiko-Ampel**: Nutze nur 🟢 (kein Risiko), 🟡 (sensibel), 🔴 (kritisch). "
+        "Setze 🔴, wenn mehrere sensible Daten kombiniert werden.\n"
+        "3. **achtung.live-Empfehlung**: Was sollte der Nutzer tun?\n"
+        "4. **Tipp**: Formuliere eine konkrete Hilfe.\n"
+        "5. **Quelle** (wenn relevant)\n\n"
+        "Antwortformat:\n"
+        "**Erkannte Datenarten:** ...\n"
+        "**Datenschutz-Risiko:** ...\n"
+        "**achtung.live-Empfehlung:** ...\n"
+        "**Tipp:** ...\n"
+        "**Quelle:** ...\n\n"
+        f"Text:\n{text}"
     )
 
     gpt_response = client.chat.completions.create(
         model="gpt-4",
-        messages=[{"role": "user", "content": f"{prompt}\n\nText:\n{text}"}],
+        messages=[{"role": "user", "content": prompt}],
         temperature=0.3
     )
     gpt_text = gpt_response.choices[0].message.content
 
-    detected = re.findall(r"(?i)Erkannte Datenarten:([\s\S]+?)\n\n", gpt_text)
+    detected = re.findall(r"(?i)Erkannte Datenarten:([\s\S]+?)\n", gpt_text)
     risk = re.findall(r"(?i)Datenschutz[- ]?Risiko:?\s*(🟢|🟡|🔴.*?)\n", gpt_text)
     explanation = re.findall(r"(?i)achtung\.live-Empfehlung:?\s*(.+?)\nTipp:", gpt_text, re.DOTALL)
     tip = re.findall(r"(?i)Tipp:?\s*(.+?)\nQuelle:", gpt_text, re.DOTALL)
@@ -58,18 +70,18 @@ def analyze():
     explanation_final = explanation[0].strip() if explanation else "Diese Info solltest du nur vertraulich teilen."
     tip_final = tip[0].strip() if tip else "Verwende sichere Methoden wie verschlüsselte E-Mail."
 
-    help_types = [k for k in ["IBAN", "Medikament"] if k.lower() in gpt_text.lower()]
     empathy_level = detect_empathy_level(text)
-    empathy_msg = None
+    shadow_msg = None
     rewrite_suggestion = False
 
-    if empathy_level:
-        if empathy_level == "hoch":
-            empathy_msg = "🆘 Dein Text klingt sehr belastet. Wir sind da – möchtest du ihn sicher umformulieren?"
-        elif empathy_level == "mittel":
-            empathy_msg = "🫂 Dieser Text wirkt sensibel. Wir können dir helfen, ihn datenschutzgerecht zu gestalten."
-        else:
-            empathy_msg = "🔍 Möchtest du diesen Text etwas neutraler und geschützter formulieren lassen?"
+    if empathy_level == "hoch":
+        shadow_msg = "🆘 Du sprichst über Gesundheit, Frust und Finanzen – möchtest du den Text schützen?"
+        rewrite_suggestion = True
+    elif empathy_level == "mittel":
+        shadow_msg = "🫂 Das klingt persönlich. Wir helfen dir beim sicheren Umschreiben."
+        rewrite_suggestion = True
+    elif empathy_level == "niedrig":
+        shadow_msg = "🔍 Möchtest du den Text in eine datensichere Form bringen?"
         rewrite_suggestion = True
 
     return jsonify({
@@ -78,8 +90,7 @@ def analyze():
         "explanation": explanation_final,
         "tip": tip_final,
         "source": source[0].strip() if source else "",
-        "explanation_media": {"types": help_types},
-        "empathy_message": empathy_msg,
+        "empathy_message": shadow_msg,
         "rewrite_offer": rewrite_suggestion,
         "empathy_level": empathy_level or ""
     })
@@ -89,7 +100,7 @@ def rewrite():
     data = request.get_json()
     original = data.get("text", "")
     prompt = (
-        "Bitte formuliere diesen Text empathisch, anonymisiert und datenschutzkonform um, "
+        "Formuliere diesen Text empathisch, anonymisiert und datenschutzkonform um, "
         "ohne die emotionale Aussage zu verlieren. Gib nur den neuen Text aus:\n\n"
         f"{original}"
     )
@@ -106,9 +117,22 @@ def howto():
         "Erstelle eine einfache Schritt-für-Schritt-Anleitung auf Deutsch für Laien, "
         "wie man eine verschlüsselte E-Mail versendet. Gib sichere Dienste wie ProtonMail an."
     )
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2
-    )
-    return jsonify({ "howto": response.choices[0].message.content.strip() })
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2
+        )
+        steps = response.choices[0].message.content.strip()
+    except Exception as e:
+        print("GPT fallback active:", e)
+        steps = (
+            "So sendest du eine verschlüsselte E-Mail:\n"
+            "1. Besuche proton.me und erstelle ein kostenloses Konto\n"
+            "2. Verfasse deine Nachricht und klicke auf das Schloss-Symbol\n"
+            "3. Lege ein Passwort fest\n"
+            "4. Teile das Passwort separat, z. B. per SMS\n"
+            "5. Der Empfänger erhält einen sicheren Link"
+        )
+
+    return jsonify({ "howto": steps })
