@@ -1,3 +1,18 @@
+:root {
+  --ci-primary: #e91e63;      /* empathisches Pink */
+  --ci-blue: #2196f3;         /* vertrauensvolles Blau */
+  --ci-bg: #fff5f8;           /* Soft-Background */
+  --ci-gray: #f6f6f6;
+  --ci-text: #333;
+}
+
+body {
+  font-family: "Helvetica Neue", sans-serif;
+  background: var(--ci-bg);
+  color: var(--ci-text);
+  padding: 2rem;
+}
+
 .media-help {
   margin-top: 20px;
   padding: 16px;
@@ -15,10 +30,11 @@
 }
 
 .feedback-box {
-  background: #f6f6f6;
+  background: var(--ci-gray);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
+  box-shadow: 0 0 4px rgba(0,0,0,0.05);
 }
 
 .empathy-box {
@@ -26,26 +42,33 @@
   border-radius: 6px;
   margin-top: 1rem;
   font-style: italic;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .empathy-box.hoch {
   background: #ffe6e6;
-  border-left: 4px solid #f44336;
+  border-left: 4px solid var(--ci-primary);
 }
 .empathy-box.mittel {
   background: #fff0f5;
-  border-left: 4px solid #e91e63;
+  border-left: 4px solid #ff4081;
 }
 .empathy-box.niedrig {
-  background: #f0f7ff;
-  border-left: 4px solid #2196f3;
+  background: #e3f2fd;
+  border-left: 4px solid var(--ci-blue);
 }
 
 .rewrite-box button {
   margin: 0.5rem 0.5rem 0 0;
   padding: 10px 14px;
+  background: #f3f3f3;
+  border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.2s;
+}
+.rewrite-box button:hover {
+  background: #e0e0e0;
 }
 
 .media-buttons a {
@@ -60,11 +83,12 @@
 
 .howto-box {
   background: #f0f7ff;
-  border-left: 4px solid #2196f3;
+  border-left: 4px solid var(--ci-blue);
   padding: 1rem;
   margin-top: 1rem;
   white-space: pre-wrap;
   border-radius: 6px;
   font-family: monospace;
   font-size: 0.95rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
